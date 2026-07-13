@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration — Gregory Baudin Portfolio</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/admin.css">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="admin-body">
+
+    <!-- Écran de Connexion -->
+    <div id="admin-login-screen" class="login-overlay">
+        <div class="login-card">
+            <div class="login-header">
+                <h2>ADMINISTRATION</h2>
+                <p>Portfolio Gregory Baudin</p>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="admin-password">Mot de passe d'accès</label>
+                    <input type="password" id="admin-password" required placeholder="Saisir le mot de passe">
+                    <div id="login-error-msg" class="error-feedback">Mot de passe incorrect</div>
+                </div>
+                <button type="submit" class="admin-btn primary-btn">Se connecter <i class="fa-solid fa-right-to-bracket"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Interface d'Administration Principale -->
+    <div id="admin-dashboard" class="admin-dashboard-container" style="display: none;">
+        <!-- Barre latérale de navigation -->
+        <aside class="admin-sidebar">
+            <div class="admin-brand">
+                <span class="logo-circle">GB</span>
+                <div>
+                    <h3>Gregory Baudin</h3>
+                    <p>Administration</p>
+                </div>
+            </div>
+            <nav class="admin-nav-tabs">
+                <button class="nav-tab active" data-target="tab-identity"><i class="fa-solid fa-id-card"></i> Identité &amp; Thème</button>
+                <button class="nav-tab" data-target="tab-apropos"><i class="fa-solid fa-user-tie"></i> À Propos &amp; Parcours</button>
+                <button class="nav-tab" data-target="tab-projects"><i class="fa-solid fa-folder-open"></i> Projets (CRUD)</button>
+                <button class="nav-tab" data-target="tab-contact"><i class="fa-solid fa-address-book"></i> Contacts &amp; Réseaux</button>
+                <button class="nav-tab" data-target="tab-system"><i class="fa-solid fa-sliders"></i> Système &amp; Sauvegarde</button>
+            </nav>
+            <div class="admin-sidebar-footer">
+                <a href="index.html" target="_blank" class="admin-btn secondary-btn view-site-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i> Voir le site</a>
+                <button id="admin-logout-btn" class="admin-btn danger-btn"><i class="fa-solid fa-power-off"></i> Déconnexion</button>
+            </div>
+        </aside>
+
+        <!-- Zone de contenu principal -->
+        <main class="admin-main-content">
+            <header class="admin-header-bar">
+                <h1 id="tab-title">Identité &amp; Thème</h1>
+                <div class="user-status">
+                    <span class="status-indicator"></span> Mode connecté
+                </div>
+            </header>
+
+            <div class="admin-tab-panels">
+
+                <!-- 1. IDENTITÉ & THÈME -->
+                <div class="tab-panel active" id="tab-identity">
+                    <form id="form-identity" class="admin-card-grid">
+                        <!-- Identité textuelle -->
+                        <div class="admin-card">
+                            <h3>Textes de présentation</h3>
+                            <div class="form-group">
+                                <label for="id-name">Nom complet</label>
+                                <input type="text" id="id-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="id-title">Titre professionnel</label>
+                                <input type="text" id="id-title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="id-accroche">Phrase d'accroche (Hero)</label>
+                                <textarea id="id-accroche" rows="3" required></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Thèmes et couleurs -->
+                        <div class="admin-card">
+                            <h3>Thème Visuel</h3>
+                            <div class="color-picker-grid">
+                                <div class="form-group color-group">
+                                    <label for="theme-primary">Fond Principal</label>
+                                    <input type="color" id="theme-primary">
+                                </div>
+                                <div class="form-group color-group">
+                                    <label for="theme-secondary">Fond Secondaire</label>
+                                    <input type="color" id="theme-secondary">
+                                </div>
+                                <div class="form-group color-group">
+                                    <label for="theme-accent">Accent &amp; Détails</label>
+                                    <input type="color" id="theme-accent">
+                                </div>
+                            </div>
+                            <div class="form-group check-group">
+                                <input type="checkbox" id="theme-darkmode">
+                                <label for="theme-darkmode">Activer le mode sombre par défaut</label>
+                            </div>
+                        </div>
+
+                        <!-- Médias profil et hero -->
+                        <div class="admin-card full-width">
+                            <h3>Images de l'accueil</h3>
+                            <div class="media-upload-grid">
+                                <div class="upload-box">
+                                    <label>Photo d'arrière-plan Hero</label>
+                                    <div class="image-preview-wrapper">
+                                        <img id="preview-hero-bg" src="" alt="Aperçu Hero BG">
+                                    </div>
+                                    <input type="file" id="upload-hero-bg" accept="image/*" class="file-input-hide">
+                                    <label for="upload-hero-bg" class="upload-trigger-btn"><i class="fa-solid fa-cloud-arrow-up"></i> Choisir une image</label>
+                                </div>
+                                <div class="upload-box">
+                                    <label>Photo de profil À Propos</label>
+                                    <div class="image-preview-wrapper portrait-wrapper">
+                                        <img id="preview-profile-img" src="" alt="Aperçu Portrait">
+                                    </div>
+                                    <input type="file" id="upload-profile" accept="image/*" class="file-input-hide">
+                                    <label for="upload-profile" class="upload-trigger-btn"><i class="fa-solid fa-cloud-arrow-up"></i> Choisir une image</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions full-width">
+                            <button type="submit" class="admin-btn primary-btn"><i class="fa-solid fa-floppy-disk"></i> Enregistrer l'identité &amp; le thème</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 2. À PROPOS & PARCOURS -->
+                <div class="tab-panel" id="tab-apropos">
+                    <form id="form-apropos" class="admin-card-grid">
+                        <div class="admin-card full-width">
+                            <h3>Textes de biographie</h3>
+                            <div class="form-group">
+                                <label for="bio-histoire">Mon Histoire (Biographie)</label>
+                                <textarea id="bio-histoire" rows="6" required></textarea>
+                                <small class="form-tip">Séparez les paragraphes par des sauts de ligne pour une mise en page aérée.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="bio-approche">Mon Approche / Philosophie</label>
+                                <textarea id="bio-approche" rows="6" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="bio-citation">Grande Citation Centrale (Hero d'introduction)</label>
+                                <input type="text" id="bio-citation" required>
+                            </div>
+                        </div>
+
+                        <!-- Timeline des expériences -->
+                        <div class="admin-card full-width">
+                            <div class="card-header-flex">
+                                <h3>Parcours &amp; Expériences</h3>
+                                <button type="button" id="add-exp-btn" class="admin-btn accent-btn btn-sm"><i class="fa-solid fa-plus"></i> Ajouter une expérience</button>
+                            </div>
+                            
+                            <div class="experiences-list-editor" id="exp-items-container">
+                                <!-- Éléments de timeline générés par JS -->
+                            </div>
+                        </div>
+
+                        <div class="form-actions full-width">
+                            <button type="submit" class="admin-btn primary-btn"><i class="fa-solid fa-floppy-disk"></i> Enregistrer À Propos &amp; Timeline</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 3. PROJETS (CRUD) -->
+                <div class="tab-panel" id="tab-projects">
+                    <div class="projects-crud-layout">
+                        <!-- Liste latérale des projets -->
+                        <div class="admin-card projects-list-card">
+                            <div class="card-header-flex">
+                                <h3>Liste des projets</h3>
+                                <button type="button" id="create-new-project-btn" class="admin-btn accent-btn btn-sm"><i class="fa-solid fa-plus"></i> Nouveau</button>
+                            </div>
+                            <ul class="projects-list-admin" id="projects-list-container">
+                                <!-- Injecté par JS -->
+                            </ul>
+                        </div>
+
+                        <!-- Formulaire d'édition du projet sélectionné -->
+                        <div class="admin-card project-editor-card" id="project-editor-container" style="display: none;">
+                            <div class="card-header-flex border-bottom">
+                                <h3 id="project-editor-title">Éditer le Projet</h3>
+                                <button type="button" id="delete-current-project-btn" class="admin-btn danger-btn btn-sm"><i class="fa-solid fa-trash-can"></i> Supprimer ce projet</button>
+                            </div>
+                            
+                            <form id="form-project-edit">
+                                <input type="hidden" id="edit-project-id">
+                                
+                                <div class="form-row-2">
+                                    <div class="form-group">
+                                        <label for="project-name-edit">Titre du Projet</label>
+                                        <input type="text" id="project-name-edit" required placeholder="ex: Projet N°01">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="project-subtitle-edit">Sous-titre / Catégorie</label>
+                                        <input type="text" id="project-subtitle-edit" required placeholder="ex: Graphique / Documentaire">
+                                    </div>
+                                </div>
+
+                                <div class="form-row-2">
+                                    <div class="form-group">
+                                        <label for="project-location-edit">Lieu du projet</label>
+                                        <input type="text" id="project-location-edit" required placeholder="ex: Port-au-Prince / Cayes">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="project-desc-edit">Description explicative</label>
+                                    <textarea id="project-desc-edit" rows="4" required placeholder="Présentez la démarche artistique..."></textarea>
+                                </div>
+
+                                <!-- Fiche technique personnalisée -->
+                                <div class="specs-editor-section">
+                                    <div class="card-header-flex">
+                                        <h4>Fiche Technique</h4>
+                                        <button type="button" id="add-spec-field-btn" class="admin-btn secondary-btn btn-sm"><i class="fa-solid fa-plus"></i> Ajouter un champ</button>
+                                    </div>
+                                    <div class="specs-fields-grid" id="project-specs-editor-container">
+                                        <!-- Champs de spécification générés par JS (Type, Matériel, etc.) -->
+                                    </div>
+                                </div>
+
+                                <!-- Gestionnaire de photos de la galerie -->
+                                <div class="gallery-editor-section">
+                                    <div class="card-header-flex">
+                                        <h4>Photos de la série</h4>
+                                        <div class="upload-actions">
+                                            <input type="file" id="add-project-photos-input" accept="image/*" multiple class="file-input-hide">
+                                            <label for="add-project-photos-input" class="upload-trigger-btn btn-sm"><i class="fa-solid fa-images"></i> Ajouter des photos</label>
+                                        </div>
+                                    </div>
+                                    <div class="gallery-thumbs-grid" id="project-gallery-editor-container">
+                                        <!-- Vignettes photos générées par JS -->
+                                    </div>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="submit" class="admin-btn primary-btn"><i class="fa-solid fa-floppy-disk"></i> Enregistrer le projet</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Message d'attente si aucun projet sélectionné -->
+                        <div class="admin-card project-editor-placeholder" id="project-editor-placeholder">
+                            <i class="fa-solid fa-folder-open placeholder-icon"></i>
+                            <p>Sélectionnez un projet dans la liste latérale ou cliquez sur "Nouveau" pour l'ajouter dynamiquement.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. CONTACTS & RÉSEAUX -->
+                <div class="tab-panel" id="tab-contact">
+                    <form id="form-contact" class="admin-card-grid">
+                        <div class="admin-card">
+                            <h3>Coordonnées</h3>
+                            <div class="form-group">
+                                <label for="contact-email-input">E-mail</label>
+                                <input type="email" id="contact-email-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-phone-input">Téléphone</label>
+                                <input type="text" id="contact-phone-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-address-input">Adresse postale</label>
+                                <input type="text" id="contact-address-input" required>
+                            </div>
+                        </div>
+
+                        <div class="admin-card">
+                            <h3>Pitch &amp; Réseaux</h3>
+                            <div class="form-group">
+                                <label for="contact-pitch-input">Pitch de motivation ("Pourquoi me choisir ?")</label>
+                                <textarea id="contact-pitch-input" rows="7" required></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Réseaux Sociaux -->
+                        <div class="admin-card full-width">
+                            <div class="card-header-flex">
+                                <h3>Réseaux Sociaux</h3>
+                                <button type="button" id="add-social-btn" class="admin-btn accent-btn btn-sm"><i class="fa-solid fa-plus"></i> Ajouter un réseau</button>
+                            </div>
+                            <div class="socials-list-editor" id="social-items-container">
+                                <!-- Éléments générés par JS -->
+                            </div>
+                        </div>
+
+                        <div class="form-actions full-width">
+                            <button type="submit" class="admin-btn primary-btn"><i class="fa-solid fa-floppy-disk"></i> Enregistrer les contacts</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 5. SYSTÈME & SAUVEGARDE -->
+                <div class="tab-panel" id="tab-system">
+                    <div class="admin-card-grid">
+                        <!-- Sécurité mot de passe -->
+                        <div class="admin-card">
+                            <h3>Sécurité Admin</h3>
+                            <form id="form-security">
+                                <div class="form-group">
+                                    <label for="admin-new-password">Nouveau mot de passe</label>
+                                    <input type="password" id="admin-new-password" required placeholder="Saisir le nouveau mot de passe">
+                                </div>
+                                <div class="form-group">
+                                    <label for="admin-confirm-password">Confirmer le mot de passe</label>
+                                    <input type="password" id="admin-confirm-password" required placeholder="Confirmer le mot de passe">
+                                </div>
+                                <button type="submit" class="admin-btn primary-btn btn-sm"><i class="fa-solid fa-lock"></i> Modifier le mot de passe</button>
+                            </form>
+                        </div>
+
+                        <!-- Outils de sauvegarde et reset -->
+                        <div class="admin-card">
+                            <h3>Sauvegarde &amp; Maintenance</h3>
+                            <p class="maintenance-warning">Exportez toutes les modifications de votre site sous forme de fichier pour les sauvegarder ou réimportez-les pour restaurer l'état.</p>
+                            
+                            <div class="system-buttons-flex">
+                                <button id="btn-export-backup" class="admin-btn primary-btn"><i class="fa-solid fa-download"></i> Exporter la base (JSON)</button>
+                                
+                                <div class="upload-backup-btn">
+                                    <input type="file" id="import-backup-file" accept=".json" class="file-input-hide">
+                                    <label for="import-backup-file" class="admin-btn accent-btn"><i class="fa-solid fa-upload"></i> Importer un fichier (JSON)</label>
+                                </div>
+
+                                <button id="btn-reset-system" class="admin-btn danger-btn"><i class="fa-solid fa-trash-arrow-up"></i> Réinitialiser aux données PDF</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast-notification" class="toast-notification">
+        <i class="fa-solid fa-circle-check"></i> <span id="toast-message">Modifications enregistrées !</span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="data/content.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

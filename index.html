@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gregory Baudin — Photographe Documentaire</title>
+    <meta name="description" content="Portfolio de Gregory Baudin, photographe documentaire capturant l'authenticité et la condition humaine à travers des visages et des paysages.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="loading">
+
+    <!-- Écran de chargement / Transition -->
+    <div id="loader" class="loader">
+        <div class="loader-content">
+            <h1 class="loader-title">GREGORY BAUDIN</h1>
+            <p class="loader-subtitle">Photographie Documentaire</p>
+            <div class="loader-bar"></div>
+        </div>
+    </div>
+
+    <!-- Navigation / Header -->
+    <header class="main-header">
+        <div class="logo">
+            <a href="index.html" id="site-logo">G. BAUDIN</a>
+        </div>
+        <nav class="desktop-nav">
+            <a href="#hero">Accueil</a>
+            <a href="#apropos">À Propos</a>
+            <a href="#projets">Projets</a>
+            <a href="#galerie">Galerie</a>
+            <a href="#contact">Contact</a>
+            <!-- Bouton changement de thème -->
+            <button id="theme-toggle-btn" class="theme-toggle-btn" aria-label="Changer de thème">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+            <a href="admin.html" class="admin-link-btn" title="Administration"><i class="fa-solid fa-gear"></i></a>
+        </nav>
+        <div class="header-right-mobile">
+            <button id="theme-toggle-btn-mobile" class="theme-toggle-btn" aria-label="Changer de thème">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+            <button class="burger-menu" id="burger-btn" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="mobile-nav-overlay" id="mobile-menu">
+        <nav class="mobile-nav">
+            <a href="#hero" class="mobile-link">Accueil</a>
+            <a href="#apropos" class="mobile-link">À Propos</a>
+            <a href="#projets" class="mobile-link">Projets</a>
+            <a href="#galerie" class="mobile-link">Galerie</a>
+            <a href="#contact" class="mobile-link">Contact</a>
+            <a href="admin.html" class="mobile-link admin-link-btn"><i class="fa-solid fa-gear"></i> Administration</a>
+        </nav>
+    </div>
+
+    <!-- Section Hero (Plein écran immersif) -->
+    <section id="hero" class="hero-section">
+        <div class="hero-bg" id="hero-bg-img"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-container">
+            <h1 class="hero-name" id="hero-name-text">Gregory Baudin</h1>
+            <p class="hero-title" id="hero-title-text">Photographe Documentaire</p>
+            <div class="hero-divider"></div>
+            <p class="hero-accroche" id="hero-accroche-text">"Capturer ce que les mots oublient."</p>
+            
+            <a href="#apropos" class="hero-scroll-indicator">
+                <span>Explorer</span>
+                <i class="fa-solid fa-arrow-down-long"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- Section À Propos (Magazine Editorial Layout) -->
+    <section id="apropos" class="apropos-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-number">01</span>
+                <h2 class="section-title">À Propos</h2>
+            </div>
+            
+            <div class="apropos-editorial-layout">
+                <!-- Côté gauche : Portrait Photo imposant -->
+                <div class="apropos-left">
+                    <div class="portrait-wrapper">
+                        <img src="" alt="Portrait Gregory Baudin" id="profile-img">
+                    </div>
+                </div>
+
+                <!-- Côté droit : Biographie narrative + Timeline -->
+                <div class="apropos-right">
+                    <div class="bio-intro-text">
+                        <p class="lead-quote">"Mon regard ne cherche pas la perfection. Je photographie l'humain dans ce qu'il a de plus sincère."</p>
+                    </div>
+                    <div class="bio-text" id="bio-text-content">
+                        <!-- Rempli par JS -->
+                    </div>
+
+                    <!-- Timeline épurée et verticale -->
+                    <div class="timeline-clean-wrapper">
+                        <h3 class="timeline-title-heading">Parcours</h3>
+                        <div class="timeline-clean" id="timeline-container">
+                            <!-- Rempli par JS (ex: 2019 -> 2022 -> etc.) -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Projets (Carnets de Reportage) -->
+    <section id="projets" class="projets-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-number">02</span>
+                <h2 class="section-title">Reportages</h2>
+            </div>
+
+            <div class="projets-editorial-list" id="projets-container">
+                <!-- Rempli par JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Galerie (Pinterest / Masonry élégante) -->
+    <section id="galerie" class="galerie-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-number">03</span>
+                <h2 class="section-title">Galerie</h2>
+            </div>
+            <p class="galerie-intro">Un aperçu de scènes quotidiennes, de silences et de regards glanés au fil des ans.</p>
+            
+            <div class="galerie-masonry-wrapper" id="galerie-masonry-container">
+                <!-- Rempli par JS avec toutes les photos de tous les projets -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Visionneuse Lightbox (Global pour index et project) -->
+    <div id="lightbox" class="lightbox" aria-hidden="true">
+        <button class="lightbox-close" id="lightbox-close-btn" aria-label="Fermer"><i class="fa-solid fa-xmark"></i></button>
+        <button class="lightbox-nav prev" id="lightbox-prev-btn" aria-label="Précédent"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="lightbox-nav next" id="lightbox-next-btn" aria-label="Suivant"><i class="fa-solid fa-chevron-right"></i></button>
+        
+        <div class="lightbox-content">
+            <img src="" alt="" id="lightbox-img" class="lightbox-image">
+            <div class="lightbox-caption" id="lightbox-caption-text">Légende de la photo</div>
+        </div>
+    </div>
+
+    <!-- Section Contact (Split layout : Photo / Formulaire) -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-number">04</span>
+                <h2 class="section-title">Contact</h2>
+            </div>
+            
+            <div class="contact-split-grid">
+                <!-- Gauche : Image immersive et coordonnées -->
+                <div class="contact-left-visual">
+                    <div class="contact-img-wrapper">
+                        <img src="assets/images/rue_1.jpg" alt="Scène documentaire">
+                    </div>
+                    <div class="contact-details-minimal">
+                        <h3 class="contact-details-title">Gregory Baudin</h3>
+                        <p class="contact-sub-info" id="contact-address">#1, Du plan, HT 6140 Pétion-ville, Haiti.</p>
+                        <p class="contact-links-minimal">
+                            <a href="mailto:baudingregory003@gmail.com" id="contact-email">baudingregory003@gmail.com</a>
+                            <span>•</span>
+                            <a href="tel:+50947164541" id="contact-phone">+509 4716-4541</a>
+                        </p>
+                        <div class="contact-socials-minimal" id="socials-container">
+                            <!-- Rempli par JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Droite : Formulaire éditorial -->
+                <div class="contact-right-form">
+                    <h3 class="form-title-editorial">Parlons de votre prochain projet.</h3>
+                    <p class="form-subtitle-editorial">Entrez en contact pour collaborer, planifier un atelier ou acquérir un tirage.</p>
+                    
+                    <form id="portfolio-contact-form" class="modern-form">
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label for="name">Votre Nom</label>
+                                <input type="text" id="name" required placeholder="ex: Jean Dupont">
+                            </div>
+                            <div class="form-group">
+                                <label for="email-field">Votre E-mail</label>
+                                <input type="email" id="email-field" required placeholder="ex: jean@exemple.com">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" rows="4" required placeholder="Décrivez votre reportage ou votre demande..."></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn-editorial">Envoyer la demande <i class="fa-solid fa-arrow-right"></i></button>
+                    </form>
+                    <div id="form-success" class="form-feedback success-msg">Message envoyé avec succès !</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <p class="footer-title">G. BAUDIN</p>
+        <p>&copy; 2026 Gregory Baudin. Tous droits réservés.</p>
+        <p class="footer-sub">Photographie Documentaire &amp; Témoignage Social</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="data/content.js"></script>
+    <script src="js/portfolio.js"></script>
+    <script src="js/animations.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+# Ignorer le PDF lourd du client
+Portfolio_GregoryBaudin.pdf
+
+# Fichiers système et logs
+*.log
+.gemini/
+.system_generated/
+pdf_extract.txt

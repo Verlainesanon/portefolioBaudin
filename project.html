@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportage — Gregory Baudin</title>
+    <meta name="description" content="Détails du reportage photographique de Gregory Baudin.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="project-detail-page">
+
+    <!-- Écran de chargement / Transition -->
+    <div id="loader" class="loader">
+        <div class="loader-content">
+            <h1 class="loader-title" id="loader-project-title">REPORTAGE</h1>
+            <div class="loader-bar"></div>
+        </div>
+    </div>
+
+    <!-- Navigation / Header -->
+    <header class="main-header project-header">
+        <div class="back-link">
+            <a href="index.html#projets"><i class="fa-solid fa-arrow-left"></i> Retour aux reportages</a>
+        </div>
+        <div class="logo">
+            <a href="index.html">G. BAUDIN</a>
+        </div>
+        <!-- Bouton thèmes -->
+        <button id="theme-toggle-btn" class="theme-toggle-btn" aria-label="Changer de thème">
+            <i class="fa-solid fa-moon"></i>
+        </button>
+    </header>
+
+    <!-- En-tête de projet dynamique -->
+    <section class="project-hero">
+        <div class="container">
+            <div class="project-meta-top">
+                <span class="project-category" id="project-category-text">Série Documentaire</span>
+                <span class="project-location" id="project-location-text"><i class="fa-solid fa-location-dot"></i> Port-au-Prince</span>
+            </div>
+            <h1 class="project-title" id="project-title-text">Titre du Reportage</h1>
+        </div>
+    </section>
+
+    <!-- Détails et Récit Photo (Split Layout) -->
+    <section class="project-info-section">
+        <div class="container">
+            <div class="project-info-grid">
+                
+                <!-- Colonne Gauche : Récit textuel & Fiche technique -->
+                <div class="project-texts-column">
+                    <div class="reportage-story">
+                        <h3 class="specs-title">Le Contexte</h3>
+                        <p class="project-desc-intro" id="project-desc-text">
+                            Description du reportage...
+                        </p>
+                    </div>
+
+                    <!-- Fiche technique type reportage -->
+                    <div class="project-specs">
+                        <h3 class="specs-title">Fiche Technique</h3>
+                        <table class="specs-table" id="project-specs-table">
+                            <!-- Rempli dynamiquement -->
+                        </table>
+                    </div>
+
+                    <!-- Quote d'ambiance -->
+                    <div class="project-reportage-quote" id="project-quote-container">
+                        <i class="fa-solid fa-quote-left quote-icon"></i>
+                        <p class="project-quote-text" id="project-quote-text-element">"Chaque cliché est une négociation silencieuse avec le temps."</p>
+                    </div>
+                </div>
+
+                <!-- Colonne Droite : Galerie photo dynamique (Masonry) -->
+                <div class="project-gallery-column">
+                    <h3 class="specs-title">Série Photographique</h3>
+                    <div class="project-gallery-grid-masonry" id="project-gallery-container">
+                        <!-- Photos injectées par JS -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Visionneuse Lightbox -->
+    <div id="lightbox" class="lightbox" aria-hidden="true">
+        <button class="lightbox-close" id="lightbox-close-btn" aria-label="Fermer"><i class="fa-solid fa-xmark"></i></button>
+        <button class="lightbox-nav prev" id="lightbox-prev-btn" aria-label="Précédent"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="lightbox-nav next" id="lightbox-next-btn" aria-label="Suivant"><i class="fa-solid fa-chevron-right"></i></button>
+        
+        <div class="lightbox-content">
+            <img src="" alt="" id="lightbox-img" class="lightbox-image">
+            <div class="lightbox-caption" id="lightbox-caption-text">Légende de la photo</div>
+        </div>
+    </div>
+
+    <!-- Navigation entre reportages -->
+    <section class="project-navigation">
+        <div class="container">
+            <div class="nav-links">
+                <a href="#" class="nav-project-btn prev" id="prev-project-btn">
+                    <span class="nav-label"><i class="fa-solid fa-arrow-left"></i> Reportage Précédent</span>
+                    <span class="nav-title" id="prev-project-title">Nom</span>
+                </a>
+                <a href="#" class="nav-project-btn next" id="next-project-btn">
+                    <span class="nav-label">Reportage Suivant <i class="fa-solid fa-arrow-right"></i></span>
+                    <span class="nav-title" id="next-project-title">Nom</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <p class="footer-title">G. BAUDIN</p>
+        <p>&copy; 2026 Gregory Baudin. Tous droits réservés.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="data/content.js"></script>
+    <script src="js/project-detail.js"></script>
+    <script src="js/animations.js"></script>
+</body>
+</html>
