@@ -933,3 +933,26 @@ body.admin-body {
     border-radius: 4px;
 }
 
+
+/* ===== Badge de messages non lus ===== */
+.unread-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: #c0392b;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-left: auto;
+}
+
+/* ===== Boîte de réception ===== */
+.messages-list-container {
+    max-height: 65vh;
+    overflow-y: auto;
+    padding-right: 4px;
+}

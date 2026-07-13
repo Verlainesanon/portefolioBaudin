@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Styles -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/admin.css">
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -25,7 +26,7 @@
             <form id="login-form">
                 <div class="form-group">
                     <label for="admin-password">Mot de passe d'accès</label>
-                    <input type="password" id="admin-password" required placeholder="Saisir le mot de passe">
+                    <input type="password" id="admin-password" required placeholder="Saisir le mot de passe" autocomplete="current-password">
                     <div id="login-error-msg" class="error-feedback">Mot de passe incorrect</div>
                 </div>
                 <button type="submit" class="admin-btn primary-btn">Se connecter <i class="fa-solid fa-right-to-bracket"></i></button>
@@ -49,7 +50,8 @@
                 <button class="nav-tab" data-target="tab-apropos"><i class="fa-solid fa-user-tie"></i> À Propos &amp; Parcours</button>
                 <button class="nav-tab" data-target="tab-projects"><i class="fa-solid fa-folder-open"></i> Projets (CRUD)</button>
                 <button class="nav-tab" data-target="tab-contact"><i class="fa-solid fa-address-book"></i> Contacts &amp; Réseaux</button>
-                <button class="nav-tab" data-target="tab-system"><i class="fa-solid fa-sliders"></i> Système &amp; Sauvegarde</button>
+                <button class="nav-tab" data-target="tab-messages"><i class="fa-solid fa-envelope"></i> Messages reçus <span id="unread-badge" class="unread-badge" style="display:none;"></span></button>
+                <button class="nav-tab" data-target="tab-system"><i class="fa-solid fa-sliders"></i> Système &amp; Sécurité</button>
             </nav>
             <div class="admin-sidebar-footer">
                 <a href="index.html" target="_blank" class="admin-btn secondary-btn view-site-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i> Voir le site</a>
@@ -308,7 +310,20 @@
                     </form>
                 </div>
 
-                <!-- 5. SYSTÈME & SAUVEGARDE -->
+                <!-- 5. MESSAGES REÇUS -->
+                <div class="tab-panel" id="tab-messages">
+                    <div class="admin-card full-width">
+                        <div class="card-header-flex">
+                            <h3>Boîte de réception — Formulaire de contact</h3>
+                            <button type="button" id="refresh-messages-btn" class="admin-btn secondary-btn btn-sm"><i class="fa-solid fa-rotate"></i> Actualiser</button>
+                        </div>
+                        <div id="messages-list-container" class="messages-list-container">
+                            <!-- Messages injectés par JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. SYSTÈME & SÉCURITÉ -->
                 <div class="tab-panel" id="tab-system">
                     <div class="admin-card-grid">
                         <!-- Sécurité mot de passe -->
@@ -316,8 +331,12 @@
                             <h3>Sécurité Admin</h3>
                             <form id="form-security">
                                 <div class="form-group">
-                                    <label for="admin-new-password">Nouveau mot de passe</label>
-                                    <input type="password" id="admin-new-password" required placeholder="Saisir le nouveau mot de passe">
+                                    <label for="admin-current-password">Mot de passe actuel</label>
+                                    <input type="password" id="admin-current-password" required placeholder="Saisir le mot de passe actuel" autocomplete="current-password">
+                                </div>
+                                <div class="form-group">
+                                    <label for="admin-new-password">Nouveau mot de passe (8+ caractères, lettres et chiffres)</label>
+                                    <input type="password" id="admin-new-password" required minlength="8" placeholder="Saisir le nouveau mot de passe" autocomplete="new-password">
                                 </div>
                                 <div class="form-group">
                                     <label for="admin-confirm-password">Confirmer le mot de passe</label>
@@ -340,7 +359,7 @@
                                     <label for="import-backup-file" class="admin-btn accent-btn"><i class="fa-solid fa-upload"></i> Importer un fichier (JSON)</label>
                                 </div>
 
-                                <button id="btn-reset-system" class="admin-btn danger-btn"><i class="fa-solid fa-trash-arrow-up"></i> Réinitialiser aux données PDF</button>
+                                <button id="btn-reset-system" class="admin-btn danger-btn"><i class="fa-solid fa-trash-arrow-up"></i> Réinitialiser aux données d'origine</button>
                             </div>
                         </div>
                     </div>
@@ -356,7 +375,6 @@
     </div>
 
     <!-- Scripts -->
-    <script src="data/content.js"></script>
     <script src="js/admin.js"></script>
 </body>
 </html>

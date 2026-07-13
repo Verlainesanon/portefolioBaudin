@@ -2,7 +2,7 @@
    PORTFOLIO GREGORY BAUDIN — PAGE DE PROJET (JS)
    -------------------------------------------------- */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     // 1. Extraction de l'ID du projet depuis l'URL
     const params = new URLSearchParams(window.location.search);
     const projectId = params.get("id");
@@ -12,8 +12,15 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    // 2. Récupération de la base de données
-    const data = getPortfolioData();
+    // 2. Récupération de la base de données via l'API sécurisée
+    let data;
+    try {
+        data = await fetchPortfolioData();
+    } catch (err) {
+        console.error(err);
+        window.location.href = "index.html";
+        return;
+    }
     const projets = data.projets || [];
     
     // Recherche du projet actuel
@@ -80,12 +87,6 @@ function setupThemeToggle() {
         toggleBtn.addEventListener("click", () => {
             const isDark = document.body.classList.toggle("dark-theme");
             localStorage.setItem("portfolio_theme_mode", isDark ? "dark" : "light");
-            
-            // Mettre à jour dans la base locale temporaire
-            const data = getPortfolioData();
-            data.theme.darkMode = isDark;
-            savePortfolioData(data);
-            
             updateThemeToggleIcons(isDark);
         });
     }

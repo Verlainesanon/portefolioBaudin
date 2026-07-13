@@ -6,3 +6,15 @@ Portfolio_GregoryBaudin.pdf
 .gemini/
 .system_generated/
 pdf_extract.txt
+
+# Node
+node_modules/
+
+# Données runtime (générées par le serveur, jamais commitées)
+data/db.json
+data/auth.json
+data/messages.json
+uploads/
+
+# Environnement
+.env

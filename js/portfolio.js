@@ -2,9 +2,16 @@
    PORTFOLIO GREGORY BAUDIN — LOGIQUE D'ACCUEIL (JS)
    -------------------------------------------------- */
 
-document.addEventListener("DOMContentLoaded", () => {
-    // 1. Initialisation des données
-    const data = getPortfolioData();
+document.addEventListener("DOMContentLoaded", async () => {
+    // 1. Initialisation des données depuis l'API sécurisée
+    let data;
+    try {
+        data = await fetchPortfolioData();
+    } catch (err) {
+        console.error(err);
+        document.body.classList.remove("loading");
+        return;
+    }
 
     // 2. Application du thème initial et configuration du switcher
     applyThemeSettings(data.theme);
@@ -58,12 +65,6 @@ function setupThemeToggle(theme) {
     const toggleFunction = () => {
         const isDark = document.body.classList.toggle("dark-theme");
         localStorage.setItem("portfolio_theme_mode", isDark ? "dark" : "light");
-        
-        // Mettre à jour l'état dans la base locale temporairement pour l'admin
-        const data = getPortfolioData();
-        data.theme.darkMode = isDark;
-        savePortfolioData(data);
-        
         updateThemeToggleIcons(isDark);
         showToast(isDark ? "Mode sombre activé" : "Mode clair activé");
     };
@@ -328,13 +329,13 @@ function renderContact(contact) {
     }
 }
 
-// Formulaire de contact avec message de confirmation toast
+// Formulaire de contact — envoi réel vers l'API (messages consultables dans l'admin)
 function setupContactForm() {
     const form = document.getElementById("portfolio-contact-form");
     const feedback = document.getElementById("form-success");
     
     if (form && feedback) {
-        form.addEventListener("submit", (e) => {
+        form.addEventListener("submit", async (e) => {
             e.preventDefault();
             const submitBtn = form.querySelector(".submit-btn-editorial");
             const originalText = submitBtn.innerHTML;
@@ -342,16 +343,32 @@ function setupContactForm() {
             submitBtn.innerHTML = `Envoi en cours... <i class="fa-solid fa-circle-notch fa-spin"></i>`;
             submitBtn.disabled = true;
             
-            setTimeout(() => {
+            try {
+                const res = await fetch("/api/contact", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        name: document.getElementById("name").value,
+                        email: document.getElementById("email-field").value,
+                        message: document.getElementById("message").value
+                    })
+                });
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error || "Erreur lors de l'envoi.");
+                }
                 feedback.style.display = "block";
+                feedback.textContent = "Message envoyé avec succès !";
                 form.reset();
+                setTimeout(() => { feedback.style.display = "none"; }, 5000);
+            } catch (err) {
+                feedback.style.display = "block";
+                feedback.textContent = err.message;
+                setTimeout(() => { feedback.style.display = "none"; }, 5000);
+            } finally {
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
-                
-                setTimeout(() => {
-                    feedback.style.display = "none";
-                }, 5000);
-            }, 1000);
+            }
         });
     }
 }
