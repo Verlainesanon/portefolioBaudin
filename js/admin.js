@@ -34,18 +34,45 @@ async function api(path, options = {}) {
 
 /* Sauvegarde le contenu complet sur le serveur */
 async function saveContent() {
-    await api("/api/content", { method: "PUT", body: currentData });
+    setSaveStatus("saving");
+    try {
+        await api("/api/content", { method: "PUT", body: currentData });
+        setSaveStatus("saved");
+    } catch (err) {
+        setSaveStatus("error");
+        throw err;
+    }
+}
+
+/* Indicateur d'état de synchronisation dans l'en-tête */
+function setSaveStatus(state) {
+    const el = document.getElementById("save-status");
+    if (!el) return;
+    if (state === "saving") {
+        el.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Enregistrement...`;
+        el.className = "save-status saving";
+    } else if (state === "saved") {
+        el.innerHTML = `<i class="fa-solid fa-circle-check"></i> Synchronisé`;
+        el.className = "save-status";
+    } else {
+        el.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Erreur de sauvegarde`;
+        el.className = "save-status error";
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     checkSession();
     setupLogin();
     setupTabs();
+    setupDashboard();
     setupIdentityForm();
+    setupThemePresets();
     setupAboutForm();
     setupProjectsCRUD();
+    setupMediaLibrary();
     setupContactForm();
     setupMessagesTab();
+    setupSeoForm();
     setupSystemTools();
 });
 
@@ -74,8 +101,11 @@ async function checkSession() {
 
 async function loadContentAndInit() {
     currentData = await api("/api/content");
+    if (!currentData.settings) currentData.settings = { sections: { apropos: true, projets: true, galerie: true, contact: true }, galerieIntro: "", footerText: "", showAdminLink: true };
+    if (!currentData.seo) currentData.seo = { metaTitle: "", metaDescription: "", keywords: "" };
     initDashboardData();
     refreshMessages();
+    refreshStats();
 }
 
 function setupLogin() {
@@ -130,8 +160,83 @@ function setupTabs() {
             tab.classList.add("active");
             document.getElementById(tab.getAttribute("data-target")).classList.add("active");
             titleEl.textContent = tab.textContent.trim();
-            if (tab.getAttribute("data-target") === "tab-messages") refreshMessages();
+            const target = tab.getAttribute("data-target");
+            if (target === "tab-messages") refreshMessages();
+            if (target === "tab-dashboard") refreshStats();
+            if (target === "tab-media") refreshMediaLibrary();
         });
+    });
+}
+
+/* Navigation programmatique vers un onglet */
+function gotoTab(targetId) {
+    const tab = document.querySelector(`.nav-tab[data-target="${targetId}"]`);
+    if (tab) tab.click();
+}
+
+/* ==================================================
+   2bis. TABLEAU DE BORD & STATISTIQUES
+   ================================================== */
+function setupDashboard() {
+    document.querySelectorAll(".quick-action-btn[data-goto]").forEach(btn => {
+        btn.addEventListener("click", () => gotoTab(btn.getAttribute("data-goto")));
+    });
+    const viewSiteBtn = document.getElementById("qa-view-site");
+    if (viewSiteBtn) viewSiteBtn.addEventListener("click", () => window.open("index.html", "_blank"));
+}
+
+async function refreshStats() {
+    if (!getToken()) return;
+    try {
+        const s = await api("/api/stats");
+        const today = new Date().toISOString().slice(0, 10);
+        document.getElementById("stat-visits").textContent = s.visits.total || 0;
+        document.getElementById("stat-today").textContent = s.visits.daily[today] || 0;
+        document.getElementById("stat-projects").textContent = s.counts.projets;
+        document.getElementById("stat-images").textContent = s.counts.images;
+        document.getElementById("stat-messages").textContent = s.counts.messages;
+        document.getElementById("stat-unread").textContent = s.counts.unread;
+        document.getElementById("stat-updated").textContent = s.updatedAt
+            ? new Date(s.updatedAt).toLocaleString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })
+            : "Jamais";
+
+        renderVisitsChart(s.visits.daily || {});
+    } catch (err) {
+        console.warn("Stats indisponibles:", err.message);
+    }
+}
+
+function renderVisitsChart(daily) {
+    const container = document.getElementById("visits-chart");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const days = [];
+    for (let i = 13; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        days.push(d.toISOString().slice(0, 10));
+    }
+    const max = Math.max(1, ...days.map(d => daily[d] || 0));
+
+    days.forEach(day => {
+        const count = daily[day] || 0;
+        const col = document.createElement("div");
+        col.className = "chart-col";
+        const bar = document.createElement("div");
+        bar.className = "chart-bar";
+        bar.style.height = Math.max(4, Math.round((count / max) * 100)) + "%";
+        bar.title = `${day} : ${count} visite(s)`;
+        const label = document.createElement("span");
+        label.className = "chart-label";
+        label.textContent = day.slice(8, 10) + "/" + day.slice(5, 7);
+        const value = document.createElement("span");
+        value.className = "chart-value";
+        value.textContent = count;
+        col.appendChild(value);
+        col.appendChild(bar);
+        col.appendChild(label);
+        container.appendChild(col);
     });
 }
 
@@ -145,6 +250,10 @@ function initDashboardData() {
     document.getElementById("theme-secondary").value = currentData.theme?.secondaryColor || "#111111";
     document.getElementById("theme-accent").value = currentData.theme?.accentColor || "#B8860B";
     document.getElementById("theme-darkmode").checked = currentData.theme?.darkMode === true;
+    const fontTitleSel = document.getElementById("theme-font-title");
+    const fontBodySel = document.getElementById("theme-font-body");
+    if (fontTitleSel) fontTitleSel.value = currentData.theme?.fontTitle || "Cormorant Garamond";
+    if (fontBodySel) fontBodySel.value = currentData.theme?.fontBody || "Inter";
 
     document.getElementById("preview-hero-bg").src = currentData.identity?.heroImage || "";
     document.getElementById("preview-profile-img").src = currentData.identity?.profileImage || "";
@@ -164,6 +273,9 @@ function initDashboardData() {
     document.getElementById("contact-address-input").value = currentData.contact?.adresse || "";
     document.getElementById("contact-pitch-input").value = currentData.apropos?.approche || "";
     renderSocialsList();
+
+    // Tab SEO & Réglages
+    initSeoForm();
 }
 
 /* ==================================================
@@ -223,6 +335,10 @@ function setupIdentityForm() {
             currentData.theme.secondaryColor = document.getElementById("theme-secondary").value;
             currentData.theme.accentColor = document.getElementById("theme-accent").value;
             currentData.theme.darkMode = document.getElementById("theme-darkmode").checked;
+            const ft = document.getElementById("theme-font-title");
+            const fb = document.getElementById("theme-font-body");
+            if (ft) currentData.theme.fontTitle = ft.value;
+            if (fb) currentData.theme.fontBody = fb.value;
 
             try {
                 await saveContent();
@@ -230,6 +346,29 @@ function setupIdentityForm() {
             } catch (err) { alert(err.message); }
         });
     }
+}
+
+/* ---------- Préréglages de thème (1 clic) ---------- */
+const THEME_PRESETS = {
+    editorial: { primaryColor: "#F5F2ED", secondaryColor: "#111111", accentColor: "#B8860B", darkMode: false },
+    noir:      { primaryColor: "#0D0D0D", secondaryColor: "#F5F0E8", accentColor: "#C9A84C", darkMode: true },
+    ivoire:    { primaryColor: "#FBF8F3", secondaryColor: "#1A1A1A", accentColor: "#A0522D", darkMode: false },
+    ardoise:   { primaryColor: "#EEF0F2", secondaryColor: "#1C2530", accentColor: "#B87333", darkMode: false },
+    foret:     { primaryColor: "#F4F1EA", secondaryColor: "#1E2A23", accentColor: "#7A8B5E", darkMode: false }
+};
+
+function setupThemePresets() {
+    document.querySelectorAll(".theme-preset").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const preset = THEME_PRESETS[btn.getAttribute("data-preset")];
+            if (!preset) return;
+            document.getElementById("theme-primary").value = preset.primaryColor;
+            document.getElementById("theme-secondary").value = preset.secondaryColor;
+            document.getElementById("theme-accent").value = preset.accentColor;
+            document.getElementById("theme-darkmode").checked = preset.darkMode;
+            showToast("Préréglage appliqué — cliquez sur Enregistrer pour le publier.");
+        });
+    });
 }
 
 /* ==================================================
@@ -730,6 +869,165 @@ async function refreshMessages() {
     } catch (err) {
         console.warn("Erreur chargement messages:", err.message);
     }
+}
+
+/* ==================================================
+   8bis. MÉDIATHÈQUE
+   ================================================== */
+function setupMediaLibrary() {
+    const uploadInput = document.getElementById("media-upload-input");
+    const refreshBtn = document.getElementById("refresh-media-btn");
+
+    if (refreshBtn) refreshBtn.addEventListener("click", refreshMediaLibrary);
+
+    if (uploadInput) {
+        uploadInput.addEventListener("change", async (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+            try {
+                showToast("Téléversement en cours...");
+                await uploadImages(files);
+                await refreshMediaLibrary();
+                showToast(`${files.length} image(s) ajoutée(s) à la médiathèque !`);
+            } catch (err) {
+                alert("Erreur d'upload : " + err.message);
+            } finally {
+                uploadInput.value = "";
+            }
+        });
+    }
+}
+
+async function refreshMediaLibrary() {
+    const container = document.getElementById("media-grid-container");
+    if (!container || !getToken()) return;
+
+    try {
+        const files = await api("/api/media");
+        container.innerHTML = "";
+
+        if (files.length === 0) {
+            container.innerHTML = `<p class="form-tip" style="grid-column: 1/-1; text-align:center; padding: 2rem;">Aucune image téléversée pour le moment. Utilisez le bouton « Téléverser » ci-dessus.</p>`;
+            return;
+        }
+
+        files.forEach(f => {
+            const card = document.createElement("div");
+            card.className = "media-card";
+
+            const img = document.createElement("img");
+            img.src = f.url;
+            img.alt = f.name;
+            img.loading = "lazy";
+            img.title = "Cliquer pour copier l'adresse de l'image";
+            img.addEventListener("click", async () => {
+                try {
+                    await navigator.clipboard.writeText(f.url);
+                    showToast("Adresse de l'image copiée !");
+                } catch {
+                    prompt("Adresse de l'image :", f.url);
+                }
+            });
+
+            const meta = document.createElement("div");
+            meta.className = "media-meta";
+            const sizeKb = (f.size / 1024).toFixed(0);
+            meta.innerHTML = `<span>${sizeKb} Ko</span>`;
+
+            const delBtn = document.createElement("button");
+            delBtn.className = "media-delete-btn";
+            delBtn.innerHTML = `<i class="fa-solid fa-trash-can"></i>`;
+            delBtn.title = "Supprimer définitivement";
+            delBtn.addEventListener("click", async () => {
+                if (!confirm("Supprimer définitivement cette image du serveur ?\nAssurez-vous qu'elle n'est plus utilisée dans vos projets.")) return;
+                try {
+                    await api(`/api/media/${encodeURIComponent(f.name)}`, { method: "DELETE" });
+                    refreshMediaLibrary();
+                    showToast("Image supprimée.");
+                } catch (err) { alert(err.message); }
+            });
+            meta.appendChild(delBtn);
+
+            card.appendChild(img);
+            card.appendChild(meta);
+            container.appendChild(card);
+        });
+    } catch (err) {
+        console.warn("Médiathèque indisponible:", err.message);
+    }
+}
+
+/* ==================================================
+   8ter. SEO & RÉGLAGES DU SITE
+   ================================================== */
+function initSeoForm() {
+    const seo = currentData.seo || {};
+    const settings = currentData.settings || {};
+    const sections = settings.sections || {};
+
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val ?? ""; };
+    const check = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val !== false; };
+
+    set("seo-title", seo.metaTitle);
+    set("seo-description", seo.metaDescription);
+    set("seo-keywords", seo.keywords);
+    check("section-apropos", sections.apropos);
+    check("section-projets", sections.projets);
+    check("section-galerie", sections.galerie);
+    check("section-contact", sections.contact);
+    check("setting-admin-link", settings.showAdminLink);
+    set("setting-galerie-intro", settings.galerieIntro);
+    set("setting-footer-text", settings.footerText);
+
+    updateSeoPreview();
+}
+
+function updateSeoPreview() {
+    const title = document.getElementById("seo-title")?.value || "Gregory Baudin — Photographe Documentaire";
+    const desc = document.getElementById("seo-description")?.value || "";
+    const pTitle = document.getElementById("seo-preview-title");
+    const pDesc = document.getElementById("seo-preview-desc");
+    const tCount = document.getElementById("seo-title-count");
+    const dCount = document.getElementById("seo-desc-count");
+    if (pTitle) pTitle.textContent = title;
+    if (pDesc) pDesc.textContent = desc || "Ajoutez une description pour améliorer votre référencement.";
+    if (tCount) tCount.textContent = title.length;
+    if (dCount) dCount.textContent = desc.length;
+}
+
+function setupSeoForm() {
+    const form = document.getElementById("form-seo");
+    if (!form) return;
+
+    ["seo-title", "seo-description"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("input", updateSeoPreview);
+    });
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        currentData.seo = {
+            metaTitle: document.getElementById("seo-title").value,
+            metaDescription: document.getElementById("seo-description").value,
+            keywords: document.getElementById("seo-keywords").value
+        };
+        currentData.settings = {
+            sections: {
+                apropos: document.getElementById("section-apropos").checked,
+                projets: document.getElementById("section-projets").checked,
+                galerie: document.getElementById("section-galerie").checked,
+                contact: document.getElementById("section-contact").checked
+            },
+            showAdminLink: document.getElementById("setting-admin-link").checked,
+            galerieIntro: document.getElementById("setting-galerie-intro").value,
+            footerText: document.getElementById("setting-footer-text").value
+        };
+
+        try {
+            await saveContent();
+            showToast("SEO et réglages du site sauvegardés !");
+        } catch (err) { alert(err.message); }
+    });
 }
 
 /* ==================================================

@@ -36,6 +36,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     applyThemeSettings(data.theme);
     setupThemeToggle();
 
+    // 3bis. Comptage anonyme des visites
+    try {
+        const key = "gb_visit_project_" + new Date().toISOString().slice(0, 10);
+        if (!sessionStorage.getItem(key)) {
+            sessionStorage.setItem(key, "1");
+            fetch("/api/stats/hit", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ page: "project" })
+            }).catch(() => {});
+        }
+    } catch { /* ignore */ }
+
     // 4. Remplissage des métadonnées SEO et Loader
     document.title = `${currentProject.titre} — ${data.identity.name}`;
     const loaderTitle = document.getElementById("loader-project-title");

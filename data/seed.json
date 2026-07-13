@@ -1,4 +1,20 @@
 {
+  "seo": {
+    "metaTitle": "Gregory Baudin — Photographe Documentaire",
+    "metaDescription": "Portfolio de Gregory Baudin, photographe documentaire capturant l'authenticité et la condition humaine à travers des visages et des paysages.",
+    "keywords": "photographe documentaire, Haïti, reportage, photographie sociale, Gregory Baudin"
+  },
+  "settings": {
+    "sections": {
+      "apropos": true,
+      "projets": true,
+      "galerie": true,
+      "contact": true
+    },
+    "galerieIntro": "Un aperçu de scènes quotidiennes, de silences et de regards glanés au fil des ans.",
+    "footerText": "Photographie Documentaire & Témoignage Social",
+    "showAdminLink": true
+  },
   "theme": {
     "primaryColor": "#F5F2ED",
     "secondaryColor": "#111111",

@@ -43,13 +43,25 @@ function writeJSON(file, data) {
     fs.renameSync(tmp, file);
 }
 
-/* Seed initial de la base de contenu */
+/* Seed initial de la base de contenu (+ rétro-remplissage des nouvelles clés) */
 function initDB() {
+    const seed = readJSON(SEED_FILE, null);
     if (!fs.existsSync(DB_FILE)) {
-        const seed = readJSON(SEED_FILE, null);
-        if (seed) writeJSON(DB_FILE, seed);
-        else writeJSON(DB_FILE, {});
+        writeJSON(DB_FILE, seed || {});
         console.log("[DB] Base de contenu initialisée depuis le seed.");
+        return;
+    }
+    // Si le seed contient de nouvelles clés (ex: seo, settings), les ajouter sans écraser
+    if (seed) {
+        const db = readJSON(DB_FILE, {});
+        let changed = false;
+        for (const key of Object.keys(seed)) {
+            if (!(key in db)) { db[key] = seed[key]; changed = true; }
+        }
+        if (changed) {
+            writeJSON(DB_FILE, db);
+            console.log("[DB] Nouvelles clés du seed ajoutées à la base existante.");
+        }
     }
 }
 
@@ -215,7 +227,7 @@ app.get("/api/content", (req, res) => {
 });
 
 /* Structure autorisée (whitelist anti-injection de clés) */
-const ALLOWED_KEYS = ["theme", "identity", "apropos", "experiences", "projets", "contact", "seo"];
+const ALLOWED_KEYS = ["theme", "identity", "apropos", "experiences", "projets", "contact", "seo", "settings"];
 
 function sanitizeContent(input) {
     if (typeof input !== "object" || input === null || Array.isArray(input)) return null;
@@ -322,6 +334,72 @@ app.delete("/api/messages/:id", requireAuth, (req, res) => {
     messages = messages.filter(m => m.id !== req.params.id);
     writeJSON(MESSAGES_FILE, messages);
     res.json({ success: true });
+});
+
+/* ---------- MÉDIATHÈQUE ---------- */
+app.get("/api/media", requireAuth, (req, res) => {
+    try {
+        const files = fs.readdirSync(UPLOAD_DIR)
+            .filter(f => /\.(jpe?g|png|webp|gif|avif)$/i.test(f))
+            .map(f => {
+                const stat = fs.statSync(path.join(UPLOAD_DIR, f));
+                return { url: `/uploads/${f}`, name: f, size: stat.size, date: stat.mtime.toISOString() };
+            })
+            .sort((a, b) => b.date.localeCompare(a.date));
+        res.json(files);
+    } catch {
+        res.json([]);
+    }
+});
+
+app.delete("/api/media/:name", requireAuth, (req, res) => {
+    const name = path.basename(req.params.name); // anti path-traversal
+    if (!/^img_[a-z0-9_]+\.(jpe?g|png|webp|gif|avif)$/i.test(name)) {
+        return res.status(400).json({ error: "Nom de fichier invalide." });
+    }
+    const filePath = path.join(UPLOAD_DIR, name);
+    if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Fichier introuvable." });
+    fs.unlinkSync(filePath);
+    res.json({ success: true });
+});
+
+/* ---------- STATISTIQUES DE VISITES ---------- */
+const STATS_FILE = path.join(DATA_DIR, "stats.json");
+const statsLimiter = rateLimit({ windowMs: 60 * 1000, max: 30 });
+
+app.post("/api/stats/hit", statsLimiter, (req, res) => {
+    const { page } = req.body || {};
+    const validPages = ["home", "project"];
+    const p = validPages.includes(page) ? page : "other";
+    const stats = readJSON(STATS_FILE, { total: 0, pages: {}, daily: {} });
+    const day = new Date().toISOString().slice(0, 10);
+    stats.total = (stats.total || 0) + 1;
+    stats.pages[p] = (stats.pages[p] || 0) + 1;
+    stats.daily[day] = (stats.daily[day] || 0) + 1;
+    // Conserver 60 jours max
+    const days = Object.keys(stats.daily).sort();
+    while (days.length > 60) delete stats.daily[days.shift()];
+    writeJSON(STATS_FILE, stats);
+    res.json({ ok: true });
+});
+
+app.get("/api/stats", requireAuth, (req, res) => {
+    const stats = readJSON(STATS_FILE, { total: 0, pages: {}, daily: {} });
+    const db = readJSON(DB_FILE, {});
+    const messages = readJSON(MESSAGES_FILE, []);
+    let imageCount = 0;
+    (db.projets || []).forEach(p => { imageCount += (p.images || []).length; });
+    res.json({
+        visits: stats,
+        counts: {
+            projets: (db.projets || []).length,
+            images: imageCount,
+            experiences: (db.experiences || []).length,
+            messages: messages.length,
+            unread: messages.filter(m => !m.read).length
+        },
+        updatedAt: db.updatedAt || null
+    });
 });
 
 /* ---------- FICHIERS STATIQUES ---------- */
