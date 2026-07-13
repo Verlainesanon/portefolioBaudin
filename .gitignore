@@ -14,6 +14,7 @@ node_modules/
 data/db.json
 data/auth.json
 data/messages.json
+data/stats.json
 uploads/
 
 # Environnement
