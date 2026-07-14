@@ -3,21 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gregory Baudin — Photographe Documentaire</title>
+    <title>Presse & Distinctions — Gregory Baudin</title>
     <meta name="description" content="Portfolio de Gregory Baudin, photographe documentaire capturant l'authenticité et la condition humaine à travers des visages et des paysages.">
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <!-- Styles -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/style.css">
-    <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="loading">
 
-    <!-- Écran de chargement / Transition -->
     <div id="loader" class="loader">
         <div class="loader-content">
             <h1 class="loader-title">GREGORY BAUDIN</h1>
@@ -26,7 +22,6 @@
         </div>
     </div>
 
-    <!-- Navigation / Header -->
     <header class="main-header">
         <div class="logo">
             <a href="index.html" id="site-logo">G. BAUDIN</a>
@@ -40,7 +35,6 @@
             <a href="temoignages.html">Témoignages</a>
             <a href="services.html">Services</a>
             <a href="contact.html">Contact</a>
-            <!-- Bouton changement de thème -->
             <button id="theme-toggle-btn" class="theme-toggle-btn" aria-label="Changer de thème">
                 <i class="fa-solid fa-moon"></i>
             </button>
@@ -58,7 +52,6 @@
         </div>
     </header>
 
-    <!-- Mobile Navigation Overlay -->
     <div class="mobile-nav-overlay" id="mobile-menu">
         <nav class="mobile-nav">
             <a href="index.html" class="mobile-link">Accueil</a>
@@ -73,31 +66,26 @@
         </nav>
     </div>
 
-    <!-- Section Hero (Plein écran immersif) -->
-    <section id="hero" class="hero-section">
-        <div class="hero-bg" id="hero-bg-img"></div>
-        <div class="hero-overlay"></div>
-        <div class="hero-container">
-            <h1 class="hero-name" id="hero-name-text">Gregory Baudin</h1>
-            <p class="hero-title" id="hero-title-text">Photographe Documentaire</p>
-            <div class="hero-divider"></div>
-            <p class="hero-accroche" id="hero-accroche-text">"Capturer ce que les mots oublient."</p>
+    <!-- Section Presse & Distinctions -->
+    <section id="presse" class="presse-section page-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-number">05</span>
+                <h2 class="section-title">Presse &amp; Distinctions</h2>
+            </div>
 
-            <a href="apropos.html" class="hero-scroll-indicator">
-                <span>Explorer</span>
-                <i class="fa-solid fa-arrow-down-long"></i>
-            </a>
+            <div class="presse-list" id="presse-container">
+                <!-- Rempli par JS -->
+            </div>
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="main-footer">
         <p class="footer-title">G. BAUDIN</p>
         <p>&copy; 2026 Gregory Baudin. Tous droits réservés.</p>
         <p class="footer-sub">Photographie Documentaire &amp; Témoignage Social</p>
     </footer>
 
-    <!-- Scripts -->
     <script src="data/content.js"></script>
     <script src="js/portfolio.js"></script>
     <script src="js/animations.js"></script>

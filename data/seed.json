@@ -9,6 +9,9 @@
       "apropos": true,
       "projets": true,
       "galerie": true,
+      "presse": true,
+      "temoignages": true,
+      "services": true,
       "contact": true
     },
     "galerieIntro": "Un aperçu de scènes quotidiennes, de silences et de regards glanés au fil des ans.",
@@ -124,6 +127,50 @@
         { "url": "assets/images/mer_1.jpg", "caption": "Départ des pêcheurs à l'aube, plage de Gelée" },
         { "url": "assets/images/mer_2.jpg", "caption": "Habitations côtières de fortune exposées aux marées" }
       ]
+    }
+  ],
+  "presse": [
+    {
+      "id": "presse_1",
+      "media": "Le Nouvelliste",
+      "titre": "Regards bruts sur le quotidien haïtien",
+      "lien": "#",
+      "annee": "2025"
+    },
+    {
+      "id": "presse_2",
+      "media": "Fondation Digicel",
+      "titre": "Reportage sélectionné pour l'exposition annuelle",
+      "lien": "#",
+      "annee": "2024"
+    }
+  ],
+  "temoignages": [
+    {
+      "id": "temoin_1",
+      "nom": "Sherley Vixamar",
+      "role": "Directrice artistique, Centre d'Art",
+      "citation": "Gregory a le don de saisir la dignité des gens qu'il photographie. Son travail sur les marchands de rue nous a bouleversés."
+    },
+    {
+      "id": "temoin_2",
+      "nom": "Rodrigue Louis",
+      "role": "Coordinateur, ENS UEH",
+      "citation": "Un professionnalisme rare et une écoute du terrain qui se ressent dans chaque image livrée."
+    }
+  ],
+  "services": [
+    {
+      "id": "service_1",
+      "titre": "Reportage documentaire",
+      "description": "Couverture d'un événement, d'une communauté ou d'un projet sur plusieurs jours, avec livraison éditée et légendée.",
+      "prix": "Sur devis"
+    },
+    {
+      "id": "service_2",
+      "titre": "Portrait & institutionnel",
+      "description": "Séance portrait pour organisations, ONG ou particuliers, en studio ou en environnement naturel.",
+      "prix": "À partir de 150 USD"
     }
   ],
   "contact": {

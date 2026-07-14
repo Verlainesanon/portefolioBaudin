@@ -6,6 +6,13 @@ Portfolio_GregoryBaudin.pdf
 .gemini/
 .system_generated/
 pdf_extract.txt
+.playwright-mcp/
+
+# Docs de travail internes (session IA, pas destinés au dépôt public)
+CLAUDE.md
+CV-Projet-Sections-Sans-Code.md
+implementation_plan.md
+progression.md
 
 # Node
 node_modules/

@@ -69,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupThemePresets();
     setupAboutForm();
     setupProjectsCRUD();
+    setupVitrineForm();
     setupMediaLibrary();
     setupContactForm();
     setupMessagesTab();
@@ -267,6 +268,9 @@ function initDashboardData() {
     // Tab 3 : Projets
     renderProjectsList();
 
+    // Tab 3bis : Presse, Témoignages & Services
+    VITRINE_LISTS.forEach(renderVitrineList);
+
     // Tab 4 : Contact
     document.getElementById("contact-email-input").value = currentData.contact?.email || "";
     document.getElementById("contact-phone-input").value = currentData.contact?.telephone || "";
@@ -281,9 +285,38 @@ function initDashboardData() {
 /* ==================================================
    3. UPLOAD D'IMAGES SÉCURISÉ (serveur)
    ================================================== */
+
+/* Compresse/redimensionne une image côté navigateur avant envoi (accélère l'upload) */
+async function compressImage(file, { maxDimension = 2000, quality = 0.8, mimeType = "image/jpeg" } = {}) {
+    if (!file.type.startsWith("image/") || file.type === "image/gif") return file;
+    if (file.size < 150 * 1024) return file; // déjà léger, inutile de compresser
+
+    try {
+        const bitmap = await createImageBitmap(file);
+        const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+        const width = Math.round(bitmap.width * scale);
+        const height = Math.round(bitmap.height * scale);
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(bitmap, 0, 0, width, height);
+        bitmap.close?.();
+
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, mimeType, quality));
+        if (!blob) return file;
+
+        const newName = file.name.replace(/\.\w+$/, "") + (mimeType === "image/jpeg" ? ".jpg" : ".webp");
+        return new File([blob], newName, { type: mimeType });
+    } catch {
+        return file; // en cas d'échec, on envoie l'original plutôt que de bloquer l'upload
+    }
+}
+
 async function uploadImages(files) {
+    const compressed = await Promise.all(Array.from(files).map(f => compressImage(f)));
     const formData = new FormData();
-    Array.from(files).forEach(f => formData.append("images", f));
+    compressed.forEach(f => formData.append("images", f));
     const result = await api("/api/upload", { method: "POST", body: formData });
     return result.files; // [{ url, size, name }]
 }
@@ -487,6 +520,153 @@ function setupExperiencesListEvents() {
             if (i < currentData.experiences.length - 1) {
                 [currentData.experiences[i + 1], currentData.experiences[i]] = [currentData.experiences[i], currentData.experiences[i + 1]];
                 renderExperiencesList();
+            }
+        });
+    });
+}
+
+/* ==================================================
+   5bis. PRESSE, TÉMOIGNAGES & SERVICES (listes génériques)
+   ================================================== */
+const VITRINE_LISTS = [
+    {
+        key: "presse", containerId: "presse-items-container", addBtnId: "add-presse-btn", label: "Presse",
+        newItem: () => ({ id: "presse_" + Date.now(), media: "Nouveau média", titre: "Titre de l'article ou de la distinction", lien: "#", annee: String(new Date().getFullYear()) }),
+        fields: [
+            { cls: "vit-media", key: "media", label: "Média / Institution", type: "text" },
+            { cls: "vit-titre", key: "titre", label: "Titre de l'article ou de la distinction", type: "text" },
+            { cls: "vit-lien", key: "lien", label: "Lien (URL)", type: "text" },
+            { cls: "vit-annee", key: "annee", label: "Année", type: "text" }
+        ]
+    },
+    {
+        key: "temoignages", containerId: "temoignages-items-container", addBtnId: "add-temoignage-btn", label: "Témoignage",
+        newItem: () => ({ id: "temoin_" + Date.now(), nom: "Nom du client", role: "Rôle / Organisation", citation: "Citation du témoignage" }),
+        fields: [
+            { cls: "vit-nom", key: "nom", label: "Nom", type: "text" },
+            { cls: "vit-role", key: "role", label: "Rôle / Organisation", type: "text" },
+            { cls: "vit-citation", key: "citation", label: "Citation", type: "textarea" }
+        ]
+    },
+    {
+        key: "services", containerId: "services-items-container", addBtnId: "add-service-btn", label: "Service",
+        newItem: () => ({ id: "service_" + Date.now(), titre: "Nom de la prestation", description: "Description de la prestation", prix: "Sur devis" }),
+        fields: [
+            { cls: "vit-titre", key: "titre", label: "Titre de la prestation", type: "text" },
+            { cls: "vit-description", key: "description", label: "Description", type: "textarea" },
+            { cls: "vit-prix", key: "prix", label: "Prix / Tarif", type: "text" }
+        ]
+    }
+];
+
+function setupVitrineForm() {
+    const form = document.getElementById("form-vitrine");
+
+    VITRINE_LISTS.forEach(list => {
+        renderVitrineList(list);
+        const addBtn = document.getElementById(list.addBtnId);
+        if (addBtn) {
+            addBtn.addEventListener("click", () => {
+                currentData[list.key] = currentData[list.key] || [];
+                currentData[list.key].push(list.newItem());
+                renderVitrineList(list);
+            });
+        }
+    });
+
+    if (form) {
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            VITRINE_LISTS.forEach(list => {
+                const container = document.getElementById(list.containerId);
+                const items = [];
+                container.querySelectorAll(".exp-item-card").forEach(card => {
+                    const item = { id: card.getAttribute("data-id") };
+                    list.fields.forEach(f => {
+                        item[f.key] = card.querySelector("." + f.cls).value;
+                    });
+                    items.push(item);
+                });
+                currentData[list.key] = items;
+            });
+
+            try {
+                await saveContent();
+                showToast("Presse, témoignages et services sauvegardés !");
+            } catch (err) { alert(err.message); }
+        });
+    }
+}
+
+function renderVitrineList(list) {
+    const container = document.getElementById(list.containerId);
+    if (!container) return;
+    container.innerHTML = "";
+
+    (currentData[list.key] || []).forEach((item, idx) => {
+        const card = document.createElement("div");
+        card.className = "exp-item-card";
+        card.setAttribute("data-id", item.id);
+
+        const fieldsHtml = list.fields.map(f => {
+            const control = f.type === "textarea"
+                ? `<textarea class="${f.cls}" rows="3" required></textarea>`
+                : `<input type="text" class="${f.cls}" required>`;
+            const wide = f.type === "textarea" ? " full-field" : "";
+            return `<div class="form-group${wide}"><label>${f.label}</label>${control}</div>`;
+        }).join("");
+
+        card.innerHTML = `
+            <div class="exp-card-header">
+                <span class="exp-number">${list.label} N°${idx + 1}</span>
+                <div class="exp-actions">
+                    <button type="button" class="admin-btn secondary-btn btn-sm move-up-btn" title="Monter"><i class="fa-solid fa-arrow-up"></i></button>
+                    <button type="button" class="admin-btn secondary-btn btn-sm move-down-btn" title="Descendre"><i class="fa-solid fa-arrow-down"></i></button>
+                    <button type="button" class="admin-btn danger-btn btn-sm delete-btn" title="Supprimer"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+            </div>
+            <div class="exp-fields">${fieldsHtml}</div>
+        `;
+        list.fields.forEach(f => {
+            card.querySelector("." + f.cls).value = item[f.key] || "";
+        });
+        container.appendChild(card);
+    });
+
+    setupVitrineListEvents(list);
+}
+
+function setupVitrineListEvents(list) {
+    const container = document.getElementById(list.containerId);
+
+    container.querySelectorAll(".delete-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            const id = e.target.closest(".exp-item-card").getAttribute("data-id");
+            currentData[list.key] = currentData[list.key].filter(item => item.id !== id);
+            renderVitrineList(list);
+        });
+    });
+
+    container.querySelectorAll(".move-up-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            const id = e.target.closest(".exp-item-card").getAttribute("data-id");
+            const items = currentData[list.key];
+            const i = items.findIndex(item => item.id === id);
+            if (i > 0) {
+                [items[i - 1], items[i]] = [items[i], items[i - 1]];
+                renderVitrineList(list);
+            }
+        });
+    });
+
+    container.querySelectorAll(".move-down-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            const id = e.target.closest(".exp-item-card").getAttribute("data-id");
+            const items = currentData[list.key];
+            const i = items.findIndex(item => item.id === id);
+            if (i < items.length - 1) {
+                [items[i + 1], items[i]] = [items[i], items[i + 1]];
+                renderVitrineList(list);
             }
         });
     });
@@ -974,6 +1154,9 @@ function initSeoForm() {
     check("section-apropos", sections.apropos);
     check("section-projets", sections.projets);
     check("section-galerie", sections.galerie);
+    check("section-presse", sections.presse);
+    check("section-temoignages", sections.temoignages);
+    check("section-services", sections.services);
     check("section-contact", sections.contact);
     check("setting-admin-link", settings.showAdminLink);
     set("setting-galerie-intro", settings.galerieIntro);
@@ -1016,6 +1199,9 @@ function setupSeoForm() {
                 apropos: document.getElementById("section-apropos").checked,
                 projets: document.getElementById("section-projets").checked,
                 galerie: document.getElementById("section-galerie").checked,
+                presse: document.getElementById("section-presse").checked,
+                temoignages: document.getElementById("section-temoignages").checked,
+                services: document.getElementById("section-services").checked,
                 contact: document.getElementById("section-contact").checked
             },
             showAdminLink: document.getElementById("setting-admin-link").checked,

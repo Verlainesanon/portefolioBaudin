@@ -32,6 +32,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 6. Rendu de la Galerie Masonry Globale
     renderMasonryGallery(data.projets);
 
+    // 6bis. Rendu Presse, Témoignages & Services
+    renderPresse(data.presse);
+    renderTemoignages(data.temoignages);
+    renderServices(data.services);
+
     // 7. Rendu des coordonnées de Contact & Réseaux
     renderContact(data.contact);
 
@@ -67,13 +72,13 @@ function applySeoSettings(seo) {
 function applySiteSettings(settings) {
     if (!settings) return;
     const sections = settings.sections || {};
-    const map = { apropos: "apropos", projets: "projets", galerie: "galerie", contact: "contact" };
+    const map = { apropos: "apropos.html", projets: "projets.html", galerie: "galerie.html", presse: "presse.html", temoignages: "temoignages.html", services: "services.html", contact: "contact.html" };
 
-    Object.entries(map).forEach(([key, id]) => {
+    Object.entries(map).forEach(([key, page]) => {
         if (sections[key] === false) {
-            const section = document.getElementById(id);
+            const section = document.getElementById(key);
             if (section) section.style.display = "none";
-            document.querySelectorAll(`a[href="#${id}"]`).forEach(a => { a.style.display = "none"; });
+            document.querySelectorAll(`a[href="${page}"]`).forEach(a => { a.style.display = "none"; });
         }
     });
 
@@ -172,11 +177,14 @@ function updateThemeToggleIcons(isDark) {
 // Remplissage du Hero avec l'effet cinématique
 function renderIdentity(identity) {
     if (!identity) return;
-    
-    document.getElementById("hero-name-text").textContent = identity.name || "Gregory Baudin";
-    document.getElementById("hero-title-text").textContent = identity.title || "Photographe Documentaire";
-    document.getElementById("hero-accroche-text").textContent = identity.accroche ? `"${identity.accroche}"` : "";
-    
+
+    const nameEl = document.getElementById("hero-name-text");
+    const titleEl = document.getElementById("hero-title-text");
+    const accrocheEl = document.getElementById("hero-accroche-text");
+    if (nameEl) nameEl.textContent = identity.name || "Gregory Baudin";
+    if (titleEl) titleEl.textContent = identity.title || "Photographe Documentaire";
+    if (accrocheEl) accrocheEl.textContent = identity.accroche ? `"${identity.accroche}"` : "";
+
     const heroBg = document.getElementById("hero-bg-img");
     if (heroBg && identity.heroImage) {
         heroBg.style.backgroundImage = `url('${identity.heroImage}')`;
@@ -377,15 +385,92 @@ function setupGlobalLightbox(images) {
     });
 }
 
+// Remplit la section Presse & Distinctions
+function renderPresse(presse) {
+    const container = document.getElementById("presse-container");
+    if (!container) return;
+    container.innerHTML = "";
+
+    if (!presse || presse.length === 0) {
+        container.innerHTML = `<p class="no-projects">Aucune mention presse pour le moment.</p>`;
+        return;
+    }
+
+    presse.forEach(p => {
+        const row = document.createElement("article");
+        row.className = "presse-item";
+        row.innerHTML = `
+            <span class="presse-annee">${p.annee || ""}</span>
+            <div class="presse-info">
+                <span class="presse-media">${p.media || ""}</span>
+                <h3 class="presse-titre">${p.lien && p.lien !== "#" ? `<a href="${p.lien}" target="_blank" rel="noopener noreferrer">${p.titre || ""}</a>` : (p.titre || "")}</h3>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+}
+
+// Remplit la section Témoignages
+function renderTemoignages(temoignages) {
+    const container = document.getElementById("temoignages-container");
+    if (!container) return;
+    container.innerHTML = "";
+
+    if (!temoignages || temoignages.length === 0) {
+        container.innerHTML = `<p class="no-projects">Aucun témoignage pour le moment.</p>`;
+        return;
+    }
+
+    temoignages.forEach(t => {
+        const card = document.createElement("article");
+        card.className = "temoignage-card";
+        card.innerHTML = `
+            <p class="temoignage-citation">"${t.citation || ""}"</p>
+            <p class="temoignage-auteur"><strong>${t.nom || ""}</strong> — ${t.role || ""}</p>
+        `;
+        container.appendChild(card);
+    });
+}
+
+// Remplit la section Services & Tarifs
+function renderServices(services) {
+    const container = document.getElementById("services-container");
+    if (!container) return;
+    container.innerHTML = "";
+
+    if (!services || services.length === 0) {
+        container.innerHTML = `<p class="no-projects">Aucun service renseigné pour le moment.</p>`;
+        return;
+    }
+
+    services.forEach(s => {
+        const card = document.createElement("article");
+        card.className = "service-card";
+        card.innerHTML = `
+            <h3 class="service-titre">${s.titre || ""}</h3>
+            <p class="service-desc">${s.description || ""}</p>
+            <span class="service-prix">${s.prix || ""}</span>
+        `;
+        container.appendChild(card);
+    });
+}
+
 // Remplit les coordonnées et les icônes de contact minimalistes
 function renderContact(contact) {
     if (!contact) return;
 
-    document.getElementById("contact-email").href = `mailto:${contact.email}`;
-    document.getElementById("contact-email").textContent = contact.email;
-    document.getElementById("contact-phone").href = `tel:${contact.telephone.replace(/\s+/g, '')}`;
-    document.getElementById("contact-phone").textContent = contact.telephone;
-    document.getElementById("contact-address").textContent = contact.adresse;
+    const emailEl = document.getElementById("contact-email");
+    const phoneEl = document.getElementById("contact-phone");
+    const addressEl = document.getElementById("contact-address");
+    if (emailEl) {
+        emailEl.href = `mailto:${contact.email}`;
+        emailEl.textContent = contact.email;
+    }
+    if (phoneEl) {
+        phoneEl.href = `tel:${contact.telephone.replace(/\s+/g, '')}`;
+        phoneEl.textContent = contact.telephone;
+    }
+    if (addressEl) addressEl.textContent = contact.adresse;
 
     // Réseaux sociaux minimalistes
     const socialsContainer = document.getElementById("socials-container");

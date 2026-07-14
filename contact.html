@@ -3,21 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gregory Baudin — Photographe Documentaire</title>
+    <title>Contact — Gregory Baudin</title>
     <meta name="description" content="Portfolio de Gregory Baudin, photographe documentaire capturant l'authenticité et la condition humaine à travers des visages et des paysages.">
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <!-- Styles -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/style.css">
-    <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="loading">
 
-    <!-- Écran de chargement / Transition -->
     <div id="loader" class="loader">
         <div class="loader-content">
             <h1 class="loader-title">GREGORY BAUDIN</h1>
@@ -26,7 +22,6 @@
         </div>
     </div>
 
-    <!-- Navigation / Header -->
     <header class="main-header">
         <div class="logo">
             <a href="index.html" id="site-logo">G. BAUDIN</a>
@@ -40,7 +35,6 @@
             <a href="temoignages.html">Témoignages</a>
             <a href="services.html">Services</a>
             <a href="contact.html">Contact</a>
-            <!-- Bouton changement de thème -->
             <button id="theme-toggle-btn" class="theme-toggle-btn" aria-label="Changer de thème">
                 <i class="fa-solid fa-moon"></i>
             </button>
@@ -58,7 +52,6 @@
         </div>
     </header>
 
-    <!-- Mobile Navigation Overlay -->
     <div class="mobile-nav-overlay" id="mobile-menu">
         <nav class="mobile-nav">
             <a href="index.html" class="mobile-link">Accueil</a>
@@ -73,31 +66,66 @@
         </nav>
     </div>
 
-    <!-- Section Hero (Plein écran immersif) -->
-    <section id="hero" class="hero-section">
-        <div class="hero-bg" id="hero-bg-img"></div>
-        <div class="hero-overlay"></div>
-        <div class="hero-container">
-            <h1 class="hero-name" id="hero-name-text">Gregory Baudin</h1>
-            <p class="hero-title" id="hero-title-text">Photographe Documentaire</p>
-            <div class="hero-divider"></div>
-            <p class="hero-accroche" id="hero-accroche-text">"Capturer ce que les mots oublient."</p>
+    <!-- Section Contact -->
+    <section id="contact" class="contact-section page-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-number">04</span>
+                <h2 class="section-title">Contact</h2>
+            </div>
 
-            <a href="apropos.html" class="hero-scroll-indicator">
-                <span>Explorer</span>
-                <i class="fa-solid fa-arrow-down-long"></i>
-            </a>
+            <div class="contact-split-grid">
+                <div class="contact-left-visual">
+                    <div class="contact-img-wrapper">
+                        <img src="assets/images/rue_1.jpg" alt="Scène documentaire">
+                    </div>
+                    <div class="contact-details-minimal">
+                        <h3 class="contact-details-title">Gregory Baudin</h3>
+                        <p class="contact-sub-info" id="contact-address">#1, Du plan, HT 6140 Pétion-ville, Haiti.</p>
+                        <p class="contact-links-minimal">
+                            <a href="mailto:baudingregory003@gmail.com" id="contact-email">baudingregory003@gmail.com</a>
+                            <span>•</span>
+                            <a href="tel:+50947164541" id="contact-phone">+509 4716-4541</a>
+                        </p>
+                        <div class="contact-socials-minimal" id="socials-container">
+                            <!-- Rempli par JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contact-right-form">
+                    <h3 class="form-title-editorial">Parlons de votre prochain projet.</h3>
+                    <p class="form-subtitle-editorial">Entrez en contact pour collaborer, planifier un atelier ou acquérir un tirage.</p>
+
+                    <form id="portfolio-contact-form" class="modern-form">
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label for="name">Votre Nom</label>
+                                <input type="text" id="name" required placeholder="ex: Wilkinson Étienne">
+                            </div>
+                            <div class="form-group">
+                                <label for="email-field">Votre E-mail</label>
+                                <input type="email" id="email-field" required placeholder="ex: wilkinson.etienne@gmail.com">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" rows="4" required placeholder="Décrivez votre reportage ou votre demande..."></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn-editorial">Envoyer la demande <i class="fa-solid fa-arrow-right"></i></button>
+                    </form>
+                    <div id="form-success" class="form-feedback success-msg">Message envoyé avec succès !</div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="main-footer">
         <p class="footer-title">G. BAUDIN</p>
         <p>&copy; 2026 Gregory Baudin. Tous droits réservés.</p>
         <p class="footer-sub">Photographie Documentaire &amp; Témoignage Social</p>
     </footer>
 
-    <!-- Scripts -->
     <script src="data/content.js"></script>
     <script src="js/portfolio.js"></script>
     <script src="js/animations.js"></script>

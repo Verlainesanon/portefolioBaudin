@@ -11,6 +11,7 @@ const rateLimit = require("express-rate-limit");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
+const sharp = require("sharp");
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
@@ -261,14 +262,9 @@ app.post("/api/content/reset", requireAuth, (req, res) => {
 
 /* ---------- UPLOAD D'IMAGES SÉCURISÉ ---------- */
 const ALLOWED_MIME = { "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif", "image/avif": ".avif" };
+const MAX_DIMENSION = 2000;
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, UPLOAD_DIR),
-    filename: (req, file, cb) => {
-        const ext = ALLOWED_MIME[file.mimetype] || ".bin";
-        cb(null, `img_${Date.now()}_${crypto.randomBytes(6).toString("hex")}${ext}`);
-    }
-});
+const storage = multer.memoryStorage();
 
 const upload = multer({
     storage,
@@ -279,15 +275,39 @@ const upload = multer({
     }
 });
 
+/* Recompresse/redimensionne une image côté serveur (garantit une taille finale raisonnable) */
+async function reencodeImage(buffer, mimetype) {
+    if (mimetype === "image/gif") return { buffer, mimetype }; // évite de casser l'animation
+    let pipeline = sharp(buffer)
+        .rotate() // corrige l'orientation EXIF
+        .resize({ width: MAX_DIMENSION, height: MAX_DIMENSION, fit: "inside", withoutEnlargement: true });
+
+    switch (mimetype) {
+        case "image/png": pipeline = pipeline.png({ compressionLevel: 9 }); break;
+        case "image/webp": pipeline = pipeline.webp({ quality: 82 }); break;
+        case "image/avif": pipeline = pipeline.avif({ quality: 60 }); break;
+        default: pipeline = pipeline.jpeg({ quality: 82, mozjpeg: true }); mimetype = "image/jpeg";
+    }
+    return { buffer: await pipeline.toBuffer(), mimetype };
+}
+
 app.post("/api/upload", requireAuth, (req, res) => {
-    upload.array("images", 12)(req, res, (err) => {
+    upload.array("images", 12)(req, res, async (err) => {
         if (err) return res.status(400).json({ error: err.message });
-        const files = (req.files || []).map(f => ({
-            url: `/uploads/${f.filename}`,
-            size: f.size,
-            name: f.originalname
-        }));
-        res.json({ success: true, files });
+        try {
+            const files = [];
+            for (const f of (req.files || [])) {
+                const { buffer, mimetype } = await reencodeImage(f.buffer, f.mimetype);
+                const ext = ALLOWED_MIME[mimetype] || ".bin";
+                const filename = `img_${Date.now()}_${crypto.randomBytes(6).toString("hex")}${ext}`;
+                fs.writeFileSync(path.join(UPLOAD_DIR, filename), buffer);
+                files.push({ url: `/uploads/${filename}`, size: buffer.length, name: f.originalname });
+            }
+            res.json({ success: true, files });
+        } catch (e) {
+            console.error("[UPLOAD]", e.message);
+            res.status(500).json({ error: "Erreur lors du traitement des images." });
+        }
     });
 });
 
@@ -407,8 +427,11 @@ app.use("/uploads", express.static(UPLOAD_DIR, { maxAge: "7d", immutable: true }
 app.use(express.static(__dirname, {
     extensions: ["html"],
     setHeaders: (res, filePath) => {
-        if (filePath.endsWith(".html")) res.set("Cache-Control", "no-cache");
-        else res.set("Cache-Control", "public, max-age=86400");
+        if (filePath.endsWith(".html") || filePath.endsWith(".js") || filePath.endsWith(".css")) {
+            res.set("Cache-Control", "no-cache");
+        } else {
+            res.set("Cache-Control", "public, max-age=86400");
+        }
     }
 }));
 

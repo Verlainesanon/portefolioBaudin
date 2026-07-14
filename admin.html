@@ -7,7 +7,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Styles -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/admin.css">
@@ -24,6 +24,7 @@
                 <p>Portfolio Gregory Baudin</p>
             </div>
             <form id="login-form">
+                <input type="text" name="username" autocomplete="username" value="admin" hidden>
                 <div class="form-group">
                     <label for="admin-password">Mot de passe d'accès</label>
                     <input type="password" id="admin-password" required placeholder="Saisir le mot de passe" autocomplete="current-password">
@@ -53,6 +54,7 @@
                 <button class="nav-tab" data-target="tab-identity"><i class="fa-solid fa-id-card"></i> Identité &amp; Thème</button>
                 <button class="nav-tab" data-target="tab-apropos"><i class="fa-solid fa-user-tie"></i> À Propos &amp; Parcours</button>
                 <button class="nav-tab" data-target="tab-projects"><i class="fa-solid fa-folder-open"></i> Projets &amp; Reportages</button>
+                <button class="nav-tab" data-target="tab-vitrine"><i class="fa-solid fa-star"></i> Presse, Avis &amp; Services</button>
                 <button class="nav-tab" data-target="tab-media"><i class="fa-solid fa-photo-film"></i> Médiathèque</button>
                 <button class="nav-tab" data-target="tab-contact"><i class="fa-solid fa-address-book"></i> Contacts &amp; Réseaux</button>
                 <span class="nav-group-label">Configuration</span>
@@ -373,6 +375,39 @@
                     </div>
                 </div>
 
+                <!-- 3bis. PRESSE, TÉMOIGNAGES & SERVICES -->
+                <div class="tab-panel" id="tab-vitrine">
+                    <form id="form-vitrine" class="admin-card-grid">
+                        <div class="admin-card full-width">
+                            <div class="card-header-flex">
+                                <h3>Presse &amp; Distinctions</h3>
+                                <button type="button" id="add-presse-btn" class="admin-btn accent-btn btn-sm"><i class="fa-solid fa-plus"></i> Ajouter</button>
+                            </div>
+                            <div class="experiences-list-editor" id="presse-items-container"></div>
+                        </div>
+
+                        <div class="admin-card full-width">
+                            <div class="card-header-flex">
+                                <h3>Témoignages</h3>
+                                <button type="button" id="add-temoignage-btn" class="admin-btn accent-btn btn-sm"><i class="fa-solid fa-plus"></i> Ajouter</button>
+                            </div>
+                            <div class="experiences-list-editor" id="temoignages-items-container"></div>
+                        </div>
+
+                        <div class="admin-card full-width">
+                            <div class="card-header-flex">
+                                <h3>Services &amp; Tarifs</h3>
+                                <button type="button" id="add-service-btn" class="admin-btn accent-btn btn-sm"><i class="fa-solid fa-plus"></i> Ajouter</button>
+                            </div>
+                            <div class="experiences-list-editor" id="services-items-container"></div>
+                        </div>
+
+                        <div class="form-actions full-width">
+                            <button type="submit" class="admin-btn primary-btn"><i class="fa-solid fa-floppy-disk"></i> Enregistrer Presse, Témoignages &amp; Services</button>
+                        </div>
+                    </form>
+                </div>
+
                 <!-- 4. CONTACTS & RÉSEAUX -->
                 <div class="tab-panel" id="tab-contact">
                     <form id="form-contact" class="admin-card-grid">
@@ -491,6 +526,18 @@
                                 <label for="section-galerie">Afficher la section « Galerie »</label>
                             </div>
                             <div class="form-group check-group">
+                                <input type="checkbox" id="section-presse" checked>
+                                <label for="section-presse">Afficher la section « Presse & Distinctions »</label>
+                            </div>
+                            <div class="form-group check-group">
+                                <input type="checkbox" id="section-temoignages" checked>
+                                <label for="section-temoignages">Afficher la section « Témoignages »</label>
+                            </div>
+                            <div class="form-group check-group">
+                                <input type="checkbox" id="section-services" checked>
+                                <label for="section-services">Afficher la section « Services & Tarifs »</label>
+                            </div>
+                            <div class="form-group check-group">
                                 <input type="checkbox" id="section-contact" checked>
                                 <label for="section-contact">Afficher la section « Contact »</label>
                             </div>
@@ -528,6 +575,7 @@
                         <div class="admin-card">
                             <h3>Sécurité Admin</h3>
                             <form id="form-security">
+                                <input type="text" name="username" autocomplete="username" value="admin" hidden>
                                 <div class="form-group">
                                     <label for="admin-current-password">Mot de passe actuel</label>
                                     <input type="password" id="admin-current-password" required placeholder="Saisir le mot de passe actuel" autocomplete="current-password">
@@ -538,7 +586,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="admin-confirm-password">Confirmer le mot de passe</label>
-                                    <input type="password" id="admin-confirm-password" required placeholder="Confirmer le mot de passe">
+                                    <input type="password" id="admin-confirm-password" required placeholder="Confirmer le mot de passe" autocomplete="new-password">
                                 </div>
                                 <button type="submit" class="admin-btn primary-btn btn-sm"><i class="fa-solid fa-lock"></i> Modifier le mot de passe</button>
                             </form>

@@ -59,6 +59,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 5. Rendu du contenu textuel du projet
     renderProjectTexts(currentProject);
 
+    // 5bis. Photo de couverture en arrière-plan du hero
+    const heroBg = document.getElementById("project-hero-bg");
+    if (heroBg && currentProject.images && currentProject.images.length > 0) {
+        heroBg.style.backgroundImage = `url('${currentProject.images[0].url}')`;
+    }
+
     // 6. Rendu de la fiche technique
     renderProjectSpecs(currentProject.fichetech);
 
@@ -186,6 +192,10 @@ function renderProjectGallery(images) {
         item.setAttribute("data-index", idx);
         item.innerHTML = `
             <img src="${img.url}" alt="${img.caption || ''}" loading="lazy">
+            <div class="gallery-item-plate">
+                <span class="plate-index">№ ${String(idx + 1).padStart(2, "0")}</span>
+                <span class="plate-caption">${img.caption || ""}</span>
+            </div>
         `;
         container.appendChild(item);
     });

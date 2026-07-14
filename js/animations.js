@@ -50,36 +50,24 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 4. Parallax / Fondu Cinématique sur la section Hero
-    const heroBg = document.getElementById("hero-bg-img");
-    const heroContainer = document.querySelector(".hero-container");
-    if (heroBg && heroContainer) {
-        window.addEventListener("scroll", () => {
-            const scrollPos = window.scrollY;
-            const heroHeight = window.innerHeight;
-
-            if (scrollPos <= heroHeight) {
-                // Effet de zoom lent et de déplacement
-                heroBg.style.transform = `scale(${1.02 + (scrollPos / heroHeight) * 0.08}) translateY(${scrollPos * 0.15}px)`;
-                
-                // Effet de fondu en noir
-                heroBg.style.opacity = 1 - (scrollPos / heroHeight) * 0.85;
-
-                // Fondu et déplacement léger du texte du Hero
-                heroContainer.style.transform = `translateY(${scrollPos * 0.3}px)`;
-                heroContainer.style.opacity = 1 - (scrollPos / heroHeight) * 1.5;
-            }
-        });
-    }
-
-    // 5. Détecteur de défilement pour la Navigation Active (uniquement sur l'index)
-    if (document.querySelector(".hero-section")) {
-        setupActiveNavOnScroll();
-    }
-
     // 6. Animation d'apparition des sections au défilement (Observer API)
     setupScrollAnimations();
+
+    // 7. Marque le lien de navigation de la page courante comme actif
+    markActiveNavLink();
 });
+
+// Marque comme actif le lien correspondant au fichier HTML courant
+function markActiveNavLink() {
+    let current = window.location.pathname.split("/").pop();
+    if (current === "") current = "index.html";
+    document.querySelectorAll(".desktop-nav a:not(.admin-link-btn), .mobile-link:not(.admin-link-btn)").forEach(link => {
+        const href = link.getAttribute("href");
+        if (href === current) {
+            link.classList.add("active");
+        }
+    });
+}
 
 // Cache le loader en fondu
 function hideLoader() {
@@ -88,32 +76,6 @@ function hideLoader() {
         loader.classList.add("fade-out");
         document.body.classList.remove("loading");
     }
-}
-
-// Détecte quelle section est visible et active le lien de menu correspondant
-function setupActiveNavOnScroll() {
-    const sections = document.querySelectorAll("section[id]");
-    const navLinks = document.querySelectorAll(".desktop-nav a:not(.admin-link-btn)");
-
-    window.addEventListener("scroll", () => {
-        let currentSectionId = "";
-        const scrollPosition = window.scrollY + 250; // Offset
-
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.offsetHeight;
-            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-                currentSectionId = section.getAttribute("id");
-            }
-        });
-
-        navLinks.forEach(link => {
-            link.classList.remove("active");
-            if (link.getAttribute("href") === `#${currentSectionId}`) {
-                link.classList.add("active");
-            }
-        });
-    });
 }
 
 // Micro-animations d'apparition (Observer API)
