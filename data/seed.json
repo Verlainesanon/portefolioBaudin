@@ -1,0 +1,139 @@
+{
+  "seo": {
+    "metaTitle": "Gregory Baudin — Photographe Documentaire",
+    "metaDescription": "Portfolio de Gregory Baudin, photographe documentaire capturant l'authenticité et la condition humaine à travers des visages et des paysages.",
+    "keywords": "photographe documentaire, Haïti, reportage, photographie sociale, Gregory Baudin"
+  },
+  "settings": {
+    "sections": {
+      "apropos": true,
+      "projets": true,
+      "galerie": true,
+      "contact": true
+    },
+    "galerieIntro": "Un aperçu de scènes quotidiennes, de silences et de regards glanés au fil des ans.",
+    "footerText": "Photographie Documentaire & Témoignage Social",
+    "showAdminLink": true
+  },
+  "theme": {
+    "primaryColor": "#F5F2ED",
+    "secondaryColor": "#111111",
+    "accentColor": "#B8860B",
+    "darkMode": false,
+    "fontTitle": "Cormorant Garamond",
+    "fontBody": "Inter"
+  },
+  "identity": {
+    "name": "Gregory Baudin",
+    "title": "Photographe Documentaire",
+    "accroche": "Capturer ce que les mots oublient.",
+    "heroImage": "assets/images/hero_bg.jpg",
+    "profileImage": "assets/images/gregory_profile.jpg"
+  },
+  "apropos": {
+    "histoire": "Mon regard ne cherche pas la perfection.\n\nJe photographie l'humain dans ce qu'il a de plus sincère.\n\nLes rues, les marchés, les regards, les silences... Passionné par la condition humaine et la fragilité de notre environnement, je me sers de la photographie comme d'un outil de témoignage. Mon travail vise à documenter le quotidien de ceux qui habitent notre époque, en capturant des scènes brutes d'authenticité.",
+    "citation": "CAPTIVÉ PAR L'AUTHENTICITÉ DU QUOTIDIEN À TRAVERS LE MOUVEMENT, JE SAISIS TOUS SES INSTANTS BRUTS ET SPONTANÉS.",
+    "approche": "Je développe une approche de la photographie centrée sur l'authenticité et l'énergie des gens et sur le rapport qu'ils développent avec leur environnement. Autrement dit, je veux valoriser l'humain ainsi que les détails qui l'entourent. D'où mon objectif est de capturer des images naturelles, spontanées et vivantes, qui racontent une histoire sans artifice.\n\nÀ travers un regard attentif et une sensibilité, je cherche à créer des visuels forts, impactants et cohérents avec chaque univers."
+  },
+  "experiences": [
+    {
+      "id": "exp_1",
+      "titre": "Découverte",
+      "periode": "2019",
+      "desc": "Premiers pas en photographie. Apprentissage autodidacte des bases techniques et développement d'une sensibilité aux scènes de rue."
+    },
+    {
+      "id": "exp_2",
+      "titre": "Formation",
+      "periode": "2022",
+      "desc": "Formation en photographie documentaire au Centre d'Art, suivie d'une master class avec Frederick Alexis pour perfectionner l'art du portrait."
+    },
+    {
+      "id": "exp_3",
+      "titre": "Terrains",
+      "periode": "2024",
+      "desc": "Reportages documentaires pour la Fondation Digicel, l' ENS UEH, Cayes Marathon, et la compagnie Sol et Sén."
+    },
+    {
+      "id": "exp_4",
+      "titre": "Premier atelier",
+      "periode": "2025",
+      "desc": "Organisation et animation d'un atelier d'initiation à la photographie à Petit-Goâve pour les jeunes de la région."
+    },
+    {
+      "id": "exp_5",
+      "titre": "Aujourd'hui",
+      "periode": "En cours",
+      "desc": "Recherches croisées entre photographie documentaire et littérature, préparation de résidences dans des zones reculées d'Haïti."
+    }
+  ],
+  "projets": [
+    {
+      "id": "proj_1",
+      "titre": "Marchands de Rue",
+      "sousTitre": "Série Documentaire",
+      "lieu": "Port-au-Prince",
+      "description": "Une série documentaire capturant l'énergie brute et la résilience des marchands dans les rues de Port-au-Prince. Entre mouvements spontanés, regards sincères et éclats de vie quotidienne, l'objectif est de révéler la dignité et les efforts de ces femmes et hommes.",
+      "fichetech": [
+        { "label": "Lieu", "value": "Port-au-Prince, Haïti" },
+        { "label": "Année", "value": "2025" },
+        { "label": "Objectif", "value": "Valoriser l'économie informelle et la condition de vie urbaine" },
+        { "label": "Matériel", "value": "Appareil photo argentique + Objectif fixe 35mm" },
+        { "label": "Technique", "value": "Lumière naturelle, filtre Vintage à faible saturation" }
+      ],
+      "images": [
+        { "url": "assets/images/rue_1.jpg", "caption": "Vendeuse de fruits au carrefour de Delmas, 2025" },
+        { "url": "assets/images/rue_2.jpg", "caption": "Négociations sous le soleil de midi, marché central" },
+        { "url": "assets/images/rue_3.jpg", "caption": "Instant de repos à l'ombre d'une échoppe" },
+        { "url": "assets/images/rue_4.jpg", "caption": "Regard croisé dans le tumulte de la rue" }
+      ]
+    },
+    {
+      "id": "proj_2",
+      "titre": "Les Pierres du Temps",
+      "sousTitre": "Patrimoine & Architecture",
+      "lieu": "Petit-Goâve / Camp-Perrin",
+      "description": "Ce travail documente la beauté silencieuse des monuments historiques et des patrimoines menacés. En figeant ces témoins architecturaux du passé, l'objectif est de sensibiliser à leur conservation et de transmettre l'histoire de la cité soulouquoise.",
+      "fichetech": [
+        { "label": "Lieu", "value": "Petit-Goâve & Camp-Perrin, Haïti" },
+        { "label": "Année", "value": "2024" },
+        { "label": "Objectif", "value": "Documenter les architectures historiques en péril" },
+        { "label": "Matériel", "value": "Appareil photo reflex + Objectif grand-angle 18mm" },
+        { "label": "Technique", "value": "Noir et blanc contrasté, ombres marquées" }
+      ],
+      "images": [
+        { "url": "assets/images/patrimoine_1.jpg", "caption": "Façade d'une ancienne demeure coloniale, Petit-Goâve" },
+        { "url": "assets/images/patrimoine_2.jpg", "caption": "Fort des Citadins sous un ciel d'orage" },
+        { "url": "assets/images/patrimoine_3.jpg", "caption": "Vestiges oubliés dans la nature sauvage de Camp-Perrin" }
+      ]
+    },
+    {
+      "id": "proj_3",
+      "titre": "Bords de Mer",
+      "sousTitre": "Photographie Sociale",
+      "lieu": "Cayes",
+      "description": "Une série de reportages mettant en lumière la vie et la vulnérabilité des communautés côtières dans le département du Sud. Les Cayes font face à des changements environnementaux majeurs, et ce travail dénonce l'impact écologique sur les riverains.",
+      "fichetech": [
+        { "label": "Lieu", "value": "Les Cayes, Haïti" },
+        { "label": "Année", "value": "2025" },
+        { "label": "Objectif", "value": "Dénoncer les vulnérabilités écologiques côtières" },
+        { "label": "Matériel", "value": "Boîtier reflex + Objectif fixe 50mm f/1.8" },
+        { "label": "Technique", "value": "Tons froids, lumière diffuse du petit matin" }
+      ],
+      "images": [
+        { "url": "assets/images/mer_1.jpg", "caption": "Départ des pêcheurs à l'aube, plage de Gelée" },
+        { "url": "assets/images/mer_2.jpg", "caption": "Habitations côtières de fortune exposées aux marées" }
+      ]
+    }
+  ],
+  "contact": {
+    "email": "baudingregory003@gmail.com",
+    "telephone": "+509 4716-4541",
+    "adresse": "#1, Du plan, HT 6140 Pétion-ville, Haiti.",
+    "socials": [
+      { "name": "Instagram", "url": "#", "icon": "instagram" },
+      { "name": "Facebook", "url": "#", "icon": "facebook" },
+      { "name": "Twitter / X", "url": "#", "icon": "twitter" }
+    ]
+  }
+}

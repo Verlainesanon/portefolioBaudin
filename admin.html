@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Styles -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/admin.css">
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -25,7 +26,7 @@
             <form id="login-form">
                 <div class="form-group">
                     <label for="admin-password">Mot de passe d'accès</label>
-                    <input type="password" id="admin-password" required placeholder="Saisir le mot de passe">
+                    <input type="password" id="admin-password" required placeholder="Saisir le mot de passe" autocomplete="current-password">
                     <div id="login-error-msg" class="error-feedback">Mot de passe incorrect</div>
                 </div>
                 <button type="submit" class="admin-btn primary-btn">Se connecter <i class="fa-solid fa-right-to-bracket"></i></button>
@@ -45,11 +46,18 @@
                 </div>
             </div>
             <nav class="admin-nav-tabs">
-                <button class="nav-tab active" data-target="tab-identity"><i class="fa-solid fa-id-card"></i> Identité &amp; Thème</button>
+                <span class="nav-group-label">Pilotage</span>
+                <button class="nav-tab active" data-target="tab-dashboard"><i class="fa-solid fa-chart-line"></i> Tableau de bord</button>
+                <button class="nav-tab" data-target="tab-messages"><i class="fa-solid fa-envelope"></i> Messages reçus <span id="unread-badge" class="unread-badge" style="display:none;"></span></button>
+                <span class="nav-group-label">Contenu</span>
+                <button class="nav-tab" data-target="tab-identity"><i class="fa-solid fa-id-card"></i> Identité &amp; Thème</button>
                 <button class="nav-tab" data-target="tab-apropos"><i class="fa-solid fa-user-tie"></i> À Propos &amp; Parcours</button>
-                <button class="nav-tab" data-target="tab-projects"><i class="fa-solid fa-folder-open"></i> Projets (CRUD)</button>
+                <button class="nav-tab" data-target="tab-projects"><i class="fa-solid fa-folder-open"></i> Projets &amp; Reportages</button>
+                <button class="nav-tab" data-target="tab-media"><i class="fa-solid fa-photo-film"></i> Médiathèque</button>
                 <button class="nav-tab" data-target="tab-contact"><i class="fa-solid fa-address-book"></i> Contacts &amp; Réseaux</button>
-                <button class="nav-tab" data-target="tab-system"><i class="fa-solid fa-sliders"></i> Système &amp; Sauvegarde</button>
+                <span class="nav-group-label">Configuration</span>
+                <button class="nav-tab" data-target="tab-seo"><i class="fa-solid fa-magnifying-glass-chart"></i> SEO &amp; Réglages du site</button>
+                <button class="nav-tab" data-target="tab-system"><i class="fa-solid fa-shield-halved"></i> Sécurité &amp; Sauvegarde</button>
             </nav>
             <div class="admin-sidebar-footer">
                 <a href="index.html" target="_blank" class="admin-btn secondary-btn view-site-btn"><i class="fa-solid fa-arrow-up-right-from-square"></i> Voir le site</a>
@@ -60,16 +68,87 @@
         <!-- Zone de contenu principal -->
         <main class="admin-main-content">
             <header class="admin-header-bar">
-                <h1 id="tab-title">Identité &amp; Thème</h1>
-                <div class="user-status">
-                    <span class="status-indicator"></span> Mode connecté
+                <h1 id="tab-title">Tableau de bord</h1>
+                <div class="header-actions">
+                    <span class="save-status" id="save-status"><i class="fa-solid fa-circle-check"></i> Synchronisé</span>
+                    <div class="user-status">
+                        <span class="status-indicator"></span> Mode connecté
+                    </div>
                 </div>
             </header>
 
             <div class="admin-tab-panels">
 
+                <!-- 0. TABLEAU DE BORD -->
+                <div class="tab-panel active" id="tab-dashboard">
+                    <div class="dashboard-stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fa-solid fa-eye"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="stat-visits">—</span>
+                                <span class="stat-label">Visites totales</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fa-solid fa-calendar-day"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="stat-today">—</span>
+                                <span class="stat-label">Visites aujourd'hui</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fa-solid fa-folder-open"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="stat-projects">—</span>
+                                <span class="stat-label">Reportages publiés</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fa-solid fa-images"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="stat-images">—</span>
+                                <span class="stat-label">Photographies en ligne</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon accent"><i class="fa-solid fa-envelope"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="stat-messages">—</span>
+                                <span class="stat-label">Messages (<span id="stat-unread">0</span> non lus)</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value stat-small" id="stat-updated">—</span>
+                                <span class="stat-label">Dernière modification</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-card-grid">
+                        <div class="admin-card full-width">
+                            <h3><i class="fa-solid fa-chart-column"></i> Fréquentation des 14 derniers jours</h3>
+                            <div class="visits-chart" id="visits-chart">
+                                <!-- Barres générées par JS -->
+                            </div>
+                        </div>
+                        <div class="admin-card full-width">
+                            <h3><i class="fa-solid fa-bolt"></i> Actions rapides</h3>
+                            <div class="quick-actions-grid">
+                                <button class="quick-action-btn" data-goto="tab-projects"><i class="fa-solid fa-plus"></i><span>Nouveau reportage</span></button>
+                                <button class="quick-action-btn" data-goto="tab-messages"><i class="fa-solid fa-envelope-open-text"></i><span>Lire les messages</span></button>
+                                <button class="quick-action-btn" data-goto="tab-identity"><i class="fa-solid fa-palette"></i><span>Modifier le thème</span></button>
+                                <button class="quick-action-btn" data-goto="tab-media"><i class="fa-solid fa-photo-film"></i><span>Médiathèque</span></button>
+                                <button class="quick-action-btn" data-goto="tab-seo"><i class="fa-solid fa-magnifying-glass-chart"></i><span>Référencement SEO</span></button>
+                                <button class="quick-action-btn" id="qa-view-site"><i class="fa-solid fa-arrow-up-right-from-square"></i><span>Voir le site en ligne</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 1. IDENTITÉ & THÈME -->
-                <div class="tab-panel active" id="tab-identity">
+                <div class="tab-panel" id="tab-identity">
                     <form id="form-identity" class="admin-card-grid">
                         <!-- Identité textuelle -->
                         <div class="admin-card">
@@ -91,6 +170,16 @@
                         <!-- Thèmes et couleurs -->
                         <div class="admin-card">
                             <h3>Thème Visuel</h3>
+                            <div class="form-group">
+                                <label>Préréglages de thème (1 clic)</label>
+                                <div class="theme-presets-row" id="theme-presets-row">
+                                    <button type="button" class="theme-preset" data-preset="editorial" title="Éditorial (beige / or)"><span style="background:#F5F2ED"></span><span style="background:#111111"></span><span style="background:#B8860B"></span></button>
+                                    <button type="button" class="theme-preset" data-preset="noir" title="Noir Galerie (sombre / or)"><span style="background:#0D0D0D"></span><span style="background:#F5F0E8"></span><span style="background:#C9A84C"></span></button>
+                                    <button type="button" class="theme-preset" data-preset="ivoire" title="Ivoire (blanc / terracotta)"><span style="background:#FBF8F3"></span><span style="background:#1A1A1A"></span><span style="background:#A0522D"></span></button>
+                                    <button type="button" class="theme-preset" data-preset="ardoise" title="Ardoise (gris bleu / cuivre)"><span style="background:#EEF0F2"></span><span style="background:#1C2530"></span><span style="background:#B87333"></span></button>
+                                    <button type="button" class="theme-preset" data-preset="foret" title="Forêt (crème / vert profond)"><span style="background:#F4F1EA"></span><span style="background:#1E2A23"></span><span style="background:#7A8B5E"></span></button>
+                                </div>
+                            </div>
                             <div class="color-picker-grid">
                                 <div class="form-group color-group">
                                     <label for="theme-primary">Fond Principal</label>
@@ -103,6 +192,26 @@
                                 <div class="form-group color-group">
                                     <label for="theme-accent">Accent &amp; Détails</label>
                                     <input type="color" id="theme-accent">
+                                </div>
+                            </div>
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label for="theme-font-title">Police des titres</label>
+                                    <select id="theme-font-title">
+                                        <option value="Cormorant Garamond">Cormorant Garamond (éditorial)</option>
+                                        <option value="Playfair Display">Playfair Display (classique chic)</option>
+                                        <option value="DM Serif Display">DM Serif Display (moderne)</option>
+                                        <option value="Libre Baskerville">Libre Baskerville (littéraire)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="theme-font-body">Police des textes</label>
+                                    <select id="theme-font-body">
+                                        <option value="Inter">Inter (sobre)</option>
+                                        <option value="Lato">Lato (doux)</option>
+                                        <option value="Work Sans">Work Sans (contemporain)</option>
+                                        <option value="Jost">Jost (géométrique)</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="form-group check-group">
@@ -308,7 +417,111 @@
                     </form>
                 </div>
 
-                <!-- 5. SYSTÈME & SAUVEGARDE -->
+                <!-- 4bis. MÉDIATHÈQUE -->
+                <div class="tab-panel" id="tab-media">
+                    <div class="admin-card full-width">
+                        <div class="card-header-flex">
+                            <h3>Médiathèque — toutes les images téléversées</h3>
+                            <div class="upload-actions">
+                                <input type="file" id="media-upload-input" accept="image/*" multiple class="file-input-hide">
+                                <label for="media-upload-input" class="upload-trigger-btn btn-sm"><i class="fa-solid fa-cloud-arrow-up"></i> Téléverser des images</label>
+                                <button type="button" id="refresh-media-btn" class="admin-btn secondary-btn btn-sm"><i class="fa-solid fa-rotate"></i></button>
+                            </div>
+                        </div>
+                        <p class="form-tip">Cliquez sur une image pour copier son adresse. Les images utilisées dans vos projets ne doivent pas être supprimées.</p>
+                        <div class="media-grid" id="media-grid-container">
+                            <!-- Vignettes injectées par JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. MESSAGES REÇUS -->
+                <div class="tab-panel" id="tab-messages">
+                    <div class="admin-card full-width">
+                        <div class="card-header-flex">
+                            <h3>Boîte de réception — Formulaire de contact</h3>
+                            <button type="button" id="refresh-messages-btn" class="admin-btn secondary-btn btn-sm"><i class="fa-solid fa-rotate"></i> Actualiser</button>
+                        </div>
+                        <div id="messages-list-container" class="messages-list-container">
+                            <!-- Messages injectés par JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5bis. SEO & RÉGLAGES DU SITE -->
+                <div class="tab-panel" id="tab-seo">
+                    <form id="form-seo" class="admin-card-grid">
+                        <div class="admin-card">
+                            <h3>Référencement (SEO)</h3>
+                            <div class="form-group">
+                                <label for="seo-title">Titre de la page (balise &lt;title&gt;)</label>
+                                <input type="text" id="seo-title" maxlength="70" placeholder="Gregory Baudin — Photographe Documentaire">
+                                <small class="form-tip">Recommandé : 50 à 60 caractères. <span id="seo-title-count">0</span>/70</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="seo-description">Description pour Google</label>
+                                <textarea id="seo-description" rows="3" maxlength="170"></textarea>
+                                <small class="form-tip">Recommandé : 140 à 160 caractères. <span id="seo-desc-count">0</span>/170</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="seo-keywords">Mots-clés (séparés par des virgules)</label>
+                                <input type="text" id="seo-keywords" placeholder="photographe documentaire, Haïti, reportage">
+                            </div>
+                            <div class="seo-preview">
+                                <span class="seo-preview-label">Aperçu Google :</span>
+                                <p class="seo-preview-title" id="seo-preview-title">Gregory Baudin — Photographe Documentaire</p>
+                                <p class="seo-preview-url">votre-site.onrender.com</p>
+                                <p class="seo-preview-desc" id="seo-preview-desc">Description du site...</p>
+                            </div>
+                        </div>
+
+                        <div class="admin-card">
+                            <h3>Visibilité des sections</h3>
+                            <p class="form-tip">Masquez temporairement une section du site sans rien supprimer.</p>
+                            <div class="form-group check-group">
+                                <input type="checkbox" id="section-apropos" checked>
+                                <label for="section-apropos">Afficher la section « À Propos »</label>
+                            </div>
+                            <div class="form-group check-group">
+                                <input type="checkbox" id="section-projets" checked>
+                                <label for="section-projets">Afficher la section « Reportages »</label>
+                            </div>
+                            <div class="form-group check-group">
+                                <input type="checkbox" id="section-galerie" checked>
+                                <label for="section-galerie">Afficher la section « Galerie »</label>
+                            </div>
+                            <div class="form-group check-group">
+                                <input type="checkbox" id="section-contact" checked>
+                                <label for="section-contact">Afficher la section « Contact »</label>
+                            </div>
+                            <hr class="card-divider">
+                            <div class="form-group check-group">
+                                <input type="checkbox" id="setting-admin-link" checked>
+                                <label for="setting-admin-link">Afficher le lien Administration dans le menu du site</label>
+                            </div>
+                        </div>
+
+                        <div class="admin-card full-width">
+                            <h3>Textes du site</h3>
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label for="setting-galerie-intro">Texte d'introduction de la Galerie</label>
+                                    <textarea id="setting-galerie-intro" rows="2"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="setting-footer-text">Texte du pied de page</label>
+                                    <input type="text" id="setting-footer-text">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions full-width">
+                            <button type="submit" class="admin-btn primary-btn"><i class="fa-solid fa-floppy-disk"></i> Enregistrer SEO &amp; Réglages</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 6. SYSTÈME & SÉCURITÉ -->
                 <div class="tab-panel" id="tab-system">
                     <div class="admin-card-grid">
                         <!-- Sécurité mot de passe -->
@@ -316,8 +529,12 @@
                             <h3>Sécurité Admin</h3>
                             <form id="form-security">
                                 <div class="form-group">
-                                    <label for="admin-new-password">Nouveau mot de passe</label>
-                                    <input type="password" id="admin-new-password" required placeholder="Saisir le nouveau mot de passe">
+                                    <label for="admin-current-password">Mot de passe actuel</label>
+                                    <input type="password" id="admin-current-password" required placeholder="Saisir le mot de passe actuel" autocomplete="current-password">
+                                </div>
+                                <div class="form-group">
+                                    <label for="admin-new-password">Nouveau mot de passe (8+ caractères, lettres et chiffres)</label>
+                                    <input type="password" id="admin-new-password" required minlength="8" placeholder="Saisir le nouveau mot de passe" autocomplete="new-password">
                                 </div>
                                 <div class="form-group">
                                     <label for="admin-confirm-password">Confirmer le mot de passe</label>
@@ -340,7 +557,7 @@
                                     <label for="import-backup-file" class="admin-btn accent-btn"><i class="fa-solid fa-upload"></i> Importer un fichier (JSON)</label>
                                 </div>
 
-                                <button id="btn-reset-system" class="admin-btn danger-btn"><i class="fa-solid fa-trash-arrow-up"></i> Réinitialiser aux données PDF</button>
+                                <button id="btn-reset-system" class="admin-btn danger-btn"><i class="fa-solid fa-trash-arrow-up"></i> Réinitialiser aux données d'origine</button>
                             </div>
                         </div>
                     </div>
@@ -356,7 +573,6 @@
     </div>
 
     <!-- Scripts -->
-    <script src="data/content.js"></script>
     <script src="js/admin.js"></script>
 </body>
 </html>

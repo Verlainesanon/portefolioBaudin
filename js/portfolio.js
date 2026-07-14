@@ -2,13 +2,23 @@
    PORTFOLIO GREGORY BAUDIN — LOGIQUE D'ACCUEIL (JS)
    -------------------------------------------------- */
 
-document.addEventListener("DOMContentLoaded", () => {
-    // 1. Initialisation des données
-    const data = getPortfolioData();
+document.addEventListener("DOMContentLoaded", async () => {
+    // 1. Initialisation des données depuis l'API sécurisée
+    let data;
+    try {
+        data = await fetchPortfolioData();
+    } catch (err) {
+        console.error(err);
+        document.body.classList.remove("loading");
+        return;
+    }
 
-    // 2. Application du thème initial et configuration du switcher
+    // 2. Application du thème, du SEO et des réglages du site
     applyThemeSettings(data.theme);
     setupThemeToggle(data.theme);
+    applySeoSettings(data.seo);
+    applySiteSettings(data.settings);
+    trackVisit("home");
 
     // 3. Rendu de l'identité et du Hero
     renderIdentity(data.identity);
@@ -29,6 +39,88 @@ document.addEventListener("DOMContentLoaded", () => {
     setupContactForm();
 });
 
+// Applique les métadonnées SEO définies dans l'admin
+function applySeoSettings(seo) {
+    if (!seo) return;
+    if (seo.metaTitle) document.title = seo.metaTitle;
+    if (seo.metaDescription) {
+        let meta = document.querySelector('meta[name="description"]');
+        if (!meta) {
+            meta = document.createElement("meta");
+            meta.name = "description";
+            document.head.appendChild(meta);
+        }
+        meta.content = seo.metaDescription;
+    }
+    if (seo.keywords) {
+        let meta = document.querySelector('meta[name="keywords"]');
+        if (!meta) {
+            meta = document.createElement("meta");
+            meta.name = "keywords";
+            document.head.appendChild(meta);
+        }
+        meta.content = seo.keywords;
+    }
+}
+
+// Applique les réglages du site (visibilité des sections, textes)
+function applySiteSettings(settings) {
+    if (!settings) return;
+    const sections = settings.sections || {};
+    const map = { apropos: "apropos", projets: "projets", galerie: "galerie", contact: "contact" };
+
+    Object.entries(map).forEach(([key, id]) => {
+        if (sections[key] === false) {
+            const section = document.getElementById(id);
+            if (section) section.style.display = "none";
+            document.querySelectorAll(`a[href="#${id}"]`).forEach(a => { a.style.display = "none"; });
+        }
+    });
+
+    // Texte d'intro de la galerie
+    if (settings.galerieIntro) {
+        const intro = document.querySelector(".galerie-intro");
+        if (intro) intro.textContent = settings.galerieIntro;
+    }
+
+    // Texte du footer
+    if (settings.footerText) {
+        const footerSub = document.querySelector(".footer-sub");
+        if (footerSub) footerSub.textContent = settings.footerText;
+    }
+
+    // Lien admin dans le menu
+    if (settings.showAdminLink === false) {
+        document.querySelectorAll(".admin-link-btn").forEach(a => { a.style.display = "none"; });
+    }
+}
+
+// Comptage anonyme des visites (aucune donnée personnelle)
+function trackVisit(page) {
+    try {
+        const key = "gb_visit_" + page + "_" + new Date().toISOString().slice(0, 10);
+        if (sessionStorage.getItem(key)) return; // 1 hit par session/jour
+        sessionStorage.setItem(key, "1");
+        fetch("/api/stats/hit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ page })
+        }).catch(() => {});
+    } catch { /* ignore */ }
+}
+
+// Charge dynamiquement une police Google si elle n'est pas déjà présente
+function ensureGoogleFont(fontName) {
+    if (!fontName || ["Cormorant Garamond", "Inter"].includes(fontName)) return;
+    const id = "gfont-" + fontName.replace(/\s+/g, "-").toLowerCase();
+    if (document.getElementById(id)) return;
+    const link = document.createElement("link");
+    link.id = id;
+    link.rel = "stylesheet";
+    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName).replace(/%20/g, "+")}:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap`;
+    document.head.appendChild(link);
+}
+
 // Applique les couleurs et polices définies dans les données
 function applyThemeSettings(theme) {
     if (!theme) return;
@@ -36,8 +128,8 @@ function applyThemeSettings(theme) {
     if (theme.primaryColor) root.style.setProperty("--primary-color", theme.primaryColor);
     if (theme.secondaryColor) root.style.setProperty("--secondary-color", theme.secondaryColor);
     if (theme.accentColor) root.style.setProperty("--accent-color", theme.accentColor);
-    if (theme.fontTitle) root.style.setProperty("--font-title", `'${theme.fontTitle}', serif`);
-    if (theme.fontBody) root.style.setProperty("--font-body", `'${theme.fontBody}', sans-serif`);
+    if (theme.fontTitle) { ensureGoogleFont(theme.fontTitle); root.style.setProperty("--font-title", `'${theme.fontTitle}', serif`); }
+    if (theme.fontBody) { ensureGoogleFont(theme.fontBody); root.style.setProperty("--font-body", `'${theme.fontBody}', sans-serif`); }
 
     // Gère la classe de thème sur le body
     const savedTheme = localStorage.getItem("portfolio_theme_mode");
@@ -58,12 +150,6 @@ function setupThemeToggle(theme) {
     const toggleFunction = () => {
         const isDark = document.body.classList.toggle("dark-theme");
         localStorage.setItem("portfolio_theme_mode", isDark ? "dark" : "light");
-        
-        // Mettre à jour l'état dans la base locale temporairement pour l'admin
-        const data = getPortfolioData();
-        data.theme.darkMode = isDark;
-        savePortfolioData(data);
-        
         updateThemeToggleIcons(isDark);
         showToast(isDark ? "Mode sombre activé" : "Mode clair activé");
     };
@@ -328,13 +414,13 @@ function renderContact(contact) {
     }
 }
 
-// Formulaire de contact avec message de confirmation toast
+// Formulaire de contact — envoi réel vers l'API (messages consultables dans l'admin)
 function setupContactForm() {
     const form = document.getElementById("portfolio-contact-form");
     const feedback = document.getElementById("form-success");
     
     if (form && feedback) {
-        form.addEventListener("submit", (e) => {
+        form.addEventListener("submit", async (e) => {
             e.preventDefault();
             const submitBtn = form.querySelector(".submit-btn-editorial");
             const originalText = submitBtn.innerHTML;
@@ -342,16 +428,32 @@ function setupContactForm() {
             submitBtn.innerHTML = `Envoi en cours... <i class="fa-solid fa-circle-notch fa-spin"></i>`;
             submitBtn.disabled = true;
             
-            setTimeout(() => {
+            try {
+                const res = await fetch("/api/contact", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        name: document.getElementById("name").value,
+                        email: document.getElementById("email-field").value,
+                        message: document.getElementById("message").value
+                    })
+                });
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error || "Erreur lors de l'envoi.");
+                }
                 feedback.style.display = "block";
+                feedback.textContent = "Message envoyé avec succès !";
                 form.reset();
+                setTimeout(() => { feedback.style.display = "none"; }, 5000);
+            } catch (err) {
+                feedback.style.display = "block";
+                feedback.textContent = err.message;
+                setTimeout(() => { feedback.style.display = "none"; }, 5000);
+            } finally {
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
-                
-                setTimeout(() => {
-                    feedback.style.display = "none";
-                }, 5000);
-            }, 1000);
+            }
         });
     }
 }
