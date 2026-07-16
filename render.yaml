@@ -16,3 +16,5 @@ services:
         generateValue: true
       - key: ADMIN_PASSWORD
         sync: false # À définir dans le dashboard Render (mot de passe admin initial)
+      - key: ADMIN_PATH
+        sync: false # URL secrète de la page admin — OBLIGATOIRE en production, à définir dans le dashboard Render (ne jamais la committer)

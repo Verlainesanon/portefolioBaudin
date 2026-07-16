@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <!-- Styles -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=3">
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -33,11 +33,43 @@
         <div class="logo">
             <a href="index.html">G. BAUDIN</a>
         </div>
-        <!-- Bouton thèmes -->
-        <button id="theme-toggle-btn" class="theme-toggle-btn" aria-label="Changer de thème">
-            <i class="fa-solid fa-moon"></i>
-        </button>
+        <nav class="desktop-nav">
+            <a href="index.html">Accueil</a>
+            <a href="apropos.html">À Propos</a>
+            <a href="projets.html">Projets</a>
+            <a href="galerie.html">Galerie</a>
+            <a href="presse.html">Presse</a>
+            <a href="temoignages.html">Témoignages</a>
+            <a href="services.html">Services</a>
+            <a href="contact.html">Contact</a>
+            <button id="theme-toggle-btn" class="theme-toggle-btn" aria-label="Changer de thème">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+        </nav>
+        <div class="header-right-mobile">
+            <button id="theme-toggle-btn-mobile" class="theme-toggle-btn" aria-label="Changer de thème">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+            <button class="burger-menu" id="burger-btn" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
     </header>
+
+    <div class="mobile-nav-overlay" id="mobile-menu">
+        <nav class="mobile-nav">
+            <a href="index.html" class="mobile-link">Accueil</a>
+            <a href="apropos.html" class="mobile-link">À Propos</a>
+            <a href="projets.html" class="mobile-link">Projets</a>
+            <a href="galerie.html" class="mobile-link">Galerie</a>
+            <a href="presse.html" class="mobile-link">Presse</a>
+            <a href="temoignages.html" class="mobile-link">Témoignages</a>
+            <a href="services.html" class="mobile-link">Services</a>
+            <a href="contact.html" class="mobile-link">Contact</a>
+        </nav>
+    </div>
 
     <!-- En-tête de projet dynamique (photo de couverture immersive) -->
     <section class="project-hero">
@@ -128,8 +160,9 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="data/content.js"></script>
-    <script src="js/project-detail.js"></script>
-    <script src="js/animations.js"></script>
+    <script src="data/content.js?v=3"></script>
+    <script src="js/theme-lightbox.js?v=3"></script>
+    <script src="js/project-detail.js?v=3"></script>
+    <script src="js/animations.js?v=3"></script>
 </body>
 </html>

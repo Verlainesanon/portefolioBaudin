@@ -725,9 +725,16 @@ function setupProjectsCRUD() {
 
             document.querySelectorAll(".gallery-thumb-card").forEach(card => {
                 const imgUrl = card.getAttribute("data-url");
-                const caption = card.querySelector(".photo-caption-input").value;
                 const img = project.images.find(i => i.url === imgUrl);
-                if (img) img.caption = caption;
+                if (img) {
+                    img.titre = card.querySelector(".photo-titre-input").value;
+                    img.sousTitre = card.querySelector(".photo-soustitre-input").value;
+                    img.caption = card.querySelector(".photo-caption-input").value;
+                    img.date = card.querySelector(".photo-date-input").value;
+                    img.type = card.querySelector(".photo-type-input").value;
+                    img.lieu = card.querySelector(".photo-lieu-input").value;
+                    img.description = card.querySelector(".photo-desc-input").value;
+                }
             });
 
             try {
@@ -777,7 +784,7 @@ function setupProjectsCRUD() {
             try {
                 showToast("Téléversement des photos...");
                 const uploaded = await uploadImages(files);
-                uploaded.forEach(f => project.images.push({ url: f.url, caption: "" }));
+                uploaded.forEach(f => project.images.push({ url: f.url, caption: "", titre: "", sousTitre: "", date: "", type: "", lieu: "", description: "" }));
                 await saveContent();
                 renderProjectGalleryEditor(project.images);
                 showToast(`${uploaded.length} photo(s) ajoutée(s) !`);
@@ -872,11 +879,25 @@ function renderProjectGalleryEditor(images) {
             <div class="thumb-image-wrapper">
                 <img alt="Miniature">
             </div>
+            <input type="text" class="photo-titre-input" placeholder="Titre de la photo">
+            <input type="text" class="photo-soustitre-input" placeholder="Sous-titre">
             <input type="text" class="photo-caption-input" placeholder="Légende de l'image">
+            <div class="photo-meta-row">
+                <input type="date" class="photo-date-input" title="Date de prise de vue">
+                <input type="text" class="photo-type-input" placeholder="Type (ex: portrait, rue)">
+            </div>
+            <input type="text" class="photo-lieu-input" placeholder="Lieu (ex: Port-au-Prince)">
+            <textarea class="photo-desc-input" placeholder="Description" rows="2"></textarea>
             <button type="button" class="delete-photo-btn" title="Supprimer la photo"><i class="fa-solid fa-trash"></i></button>
         `;
         card.querySelector("img").src = img.url;
+        card.querySelector(".photo-titre-input").value = img.titre || "";
+        card.querySelector(".photo-soustitre-input").value = img.sousTitre || "";
         card.querySelector(".photo-caption-input").value = img.caption || "";
+        card.querySelector(".photo-date-input").value = img.date || "";
+        card.querySelector(".photo-type-input").value = img.type || "";
+        card.querySelector(".photo-lieu-input").value = img.lieu || "";
+        card.querySelector(".photo-desc-input").value = img.description || "";
 
         card.querySelector(".delete-photo-btn").addEventListener("click", async () => {
             const project = currentData.projets.find(p => p.id === selectedProjectId);
@@ -1158,9 +1179,9 @@ function initSeoForm() {
     check("section-temoignages", sections.temoignages);
     check("section-services", sections.services);
     check("section-contact", sections.contact);
-    check("setting-admin-link", settings.showAdminLink);
     set("setting-galerie-intro", settings.galerieIntro);
     set("setting-footer-text", settings.footerText);
+    set("setting-galerie-sort", settings.galerieSort || "defaut");
 
     updateSeoPreview();
 }
@@ -1204,9 +1225,9 @@ function setupSeoForm() {
                 services: document.getElementById("section-services").checked,
                 contact: document.getElementById("section-contact").checked
             },
-            showAdminLink: document.getElementById("setting-admin-link").checked,
             galerieIntro: document.getElementById("setting-galerie-intro").value,
-            footerText: document.getElementById("setting-footer-text").value
+            footerText: document.getElementById("setting-footer-text").value,
+            galerieSort: document.getElementById("setting-galerie-sort").value
         };
 
         try {

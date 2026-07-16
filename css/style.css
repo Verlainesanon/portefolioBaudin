@@ -109,6 +109,104 @@ a {
     outline-offset: 3px;
 }
 
+/* Garde-fou responsive : aucune image ne déborde de son conteneur */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Notification toast (générée par js/theme-lightbox.js) */
+.toast-notification {
+    position: fixed; bottom: 2rem; right: 2rem; background-color: var(--secondary-color);
+    color: var(--primary-color); padding: 1rem 2rem; border-radius: 4px;
+    display: flex; align-items: center; gap: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    z-index: 10000; transform: translateY(150%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-size: 0.9rem; font-family: var(--font-body); border-left: 3px solid var(--accent-color);
+}
+.toast-notification.show { transform: translateY(0); }
+.toast-notification i { color: var(--accent-color); font-size: 1.2rem; }
+
+/* Légendes générées par JS (ex-styles inline) */
+.masonry-caption-project {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent-color);
+    margin-top: 0.3rem;
+}
+.lightbox-caption-sep {
+    margin: 0 0.5rem;
+    color: var(--accent-color);
+}
+.project-desc-para {
+    margin-bottom: 1.5rem;
+}
+
+/* Barre de filtres / tri de la galerie */
+.galerie-filter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.galerie-type-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+}
+
+.galerie-filter-btn {
+    background: none;
+    border: none;
+    padding: 0.3rem 0;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted-color);
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+    transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.galerie-filter-btn:hover {
+    color: var(--secondary-color);
+}
+
+.galerie-filter-btn.active {
+    color: var(--accent-color);
+    border-bottom-color: var(--accent-color);
+}
+
+.galerie-sort-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted-color);
+}
+
+.galerie-sort-select {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    padding: 0.45rem 0.8rem;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    color: var(--secondary-color);
+    cursor: pointer;
+}
+
+body.dark-theme .galerie-sort-select option {
+    background-color: var(--primary-color);
+}
+
 /* Conteneurs */
 .container {
     width: 100%;
@@ -122,7 +220,7 @@ a {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: 100vh;
     background-color: var(--primary-color);
     z-index: 9999;
@@ -219,7 +317,13 @@ body.dark-theme .main-header {
 }
 
 body.dark-theme .main-header.scrolled {
+    /* Doit redéclarer le fond : body.dark-theme .main-header est plus spécifique que .main-header.scrolled */
+    background: color-mix(in srgb, var(--primary-color) 88%, transparent);
     box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+}
+
+@supports not (background: color-mix(in srgb, red 50%, blue)) {
+    body.dark-theme .main-header.scrolled { background-color: var(--primary-color); }
 }
 
 .logo a {
@@ -343,14 +447,15 @@ body.dark-theme .main-header.scrolled {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: 100vh;
     background-color: var(--primary-color);
     z-index: 99;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     transform: translateY(-100%);
     /* Totalement invisible et non-interactif quand fermé (fix texte fantôme) */
     visibility: hidden;
@@ -359,6 +464,12 @@ body.dark-theme .main-header.scrolled {
     transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1),
                 opacity 0.4s ease,
                 visibility 0s linear 0.6s;
+}
+
+/* Contenu plus haut que l'écran : on colle en haut et on laisse défiler */
+.mobile-nav {
+    margin: auto;
+    padding: 6rem 0 4rem;
 }
 
 .mobile-nav-overlay.open {
@@ -371,8 +482,9 @@ body.dark-theme .main-header.scrolled {
                 visibility 0s;
 }
 
-/* Sur grand écran, le menu mobile n'a aucune raison d'exister */
-@media (min-width: 993px) {
+/* Sur grand écran (nav desktop visible), le menu mobile n'a aucune raison d'exister.
+   Aligné sur le breakpoint 1360px où le burger apparaît. */
+@media (min-width: 1361px) {
     .mobile-nav-overlay { display: none; }
 }
 

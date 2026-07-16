@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // 2. Application du thème, du SEO et des réglages du site
     applyThemeSettings(data.theme);
-    setupThemeToggle(data.theme);
+    setupThemeToggle();
     applySeoSettings(data.seo);
     applySiteSettings(data.settings);
     trackVisit("home");
@@ -29,8 +29,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 5. Rendu de la liste des projets (Asymétrique)
     renderProjects(data.projets);
 
-    // 6. Rendu de la Galerie Masonry Globale
-    renderMasonryGallery(data.projets);
+    // 6. Rendu de la Galerie Masonry Globale (avec filtres/tri sur la page galerie)
+    renderMasonryGallery(data.projets, data.settings);
 
     // 6bis. Rendu Presse, Témoignages & Services
     renderPresse(data.presse);
@@ -93,11 +93,6 @@ function applySiteSettings(settings) {
         const footerSub = document.querySelector(".footer-sub");
         if (footerSub) footerSub.textContent = settings.footerText;
     }
-
-    // Lien admin dans le menu
-    if (settings.showAdminLink === false) {
-        document.querySelectorAll(".admin-link-btn").forEach(a => { a.style.display = "none"; });
-    }
 }
 
 // Comptage anonyme des visites (aucune donnée personnelle)
@@ -114,65 +109,7 @@ function trackVisit(page) {
     } catch { /* ignore */ }
 }
 
-// Charge dynamiquement une police Google si elle n'est pas déjà présente
-function ensureGoogleFont(fontName) {
-    if (!fontName || ["Cormorant Garamond", "Inter"].includes(fontName)) return;
-    const id = "gfont-" + fontName.replace(/\s+/g, "-").toLowerCase();
-    if (document.getElementById(id)) return;
-    const link = document.createElement("link");
-    link.id = id;
-    link.rel = "stylesheet";
-    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName).replace(/%20/g, "+")}:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap`;
-    document.head.appendChild(link);
-}
-
-// Applique les couleurs et polices définies dans les données
-function applyThemeSettings(theme) {
-    if (!theme) return;
-    const root = document.documentElement;
-    if (theme.primaryColor) root.style.setProperty("--primary-color", theme.primaryColor);
-    if (theme.secondaryColor) root.style.setProperty("--secondary-color", theme.secondaryColor);
-    if (theme.accentColor) root.style.setProperty("--accent-color", theme.accentColor);
-    if (theme.fontTitle) { ensureGoogleFont(theme.fontTitle); root.style.setProperty("--font-title", `'${theme.fontTitle}', serif`); }
-    if (theme.fontBody) { ensureGoogleFont(theme.fontBody); root.style.setProperty("--font-body", `'${theme.fontBody}', sans-serif`); }
-
-    // Gère la classe de thème sur le body
-    const savedTheme = localStorage.getItem("portfolio_theme_mode");
-    if (savedTheme === "dark" || (savedTheme === null && theme.darkMode === true)) {
-        document.body.classList.add("dark-theme");
-        updateThemeToggleIcons(true);
-    } else {
-        document.body.classList.remove("dark-theme");
-        updateThemeToggleIcons(false);
-    }
-}
-
-// Configure le bouton de bascule du mode clair / sombre
-function setupThemeToggle(theme) {
-    const toggleBtn = document.getElementById("theme-toggle-btn");
-    const toggleBtnMobile = document.getElementById("theme-toggle-btn-mobile");
-
-    const toggleFunction = () => {
-        const isDark = document.body.classList.toggle("dark-theme");
-        localStorage.setItem("portfolio_theme_mode", isDark ? "dark" : "light");
-        updateThemeToggleIcons(isDark);
-        showToast(isDark ? "Mode sombre activé" : "Mode clair activé");
-    };
-
-    if (toggleBtn) toggleBtn.addEventListener("click", toggleFunction);
-    if (toggleBtnMobile) toggleBtnMobile.addEventListener("click", toggleFunction);
-}
-
-function updateThemeToggleIcons(isDark) {
-    const icons = document.querySelectorAll(".theme-toggle-btn i");
-    icons.forEach(icon => {
-        if (isDark) {
-            icon.className = "fa-solid fa-sun";
-        } else {
-            icon.className = "fa-solid fa-moon";
-        }
-    });
-}
+// (Thème, polices et toast : voir js/theme-lightbox.js)
 
 // Remplissage du Hero avec l'effet cinématique
 function renderIdentity(identity) {
@@ -268,20 +205,24 @@ function renderProjects(projets) {
 }
 
 // Récupère toutes les photos de tous les projets et les affiche dans la galerie globale Masonry
-function renderMasonryGallery(projets) {
+function renderMasonryGallery(projets, settings) {
     const container = document.getElementById("galerie-masonry-container");
     if (!container) return;
-    
-    container.innerHTML = "";
-    
+
     const allImages = [];
-    
-    projets.forEach(proj => {
+
+    (projets || []).forEach(proj => {
         if (proj.images) {
             proj.images.forEach(img => {
                 allImages.push({
                     url: img.url,
                     caption: img.caption || "",
+                    titre: img.titre || "",
+                    sousTitre: img.sousTitre || "",
+                    date: img.date || "",
+                    type: img.type || "",
+                    lieu: img.lieu || "",
+                    description: img.description || "",
                     projectTitle: proj.titre,
                     projectId: proj.id
                 });
@@ -294,95 +235,90 @@ function renderMasonryGallery(projets) {
         return;
     }
 
-    // Mélanger un peu les images pour l'esthétique ou les trier par projet
-    allImages.forEach((img, idx) => {
-        const item = document.createElement("div");
-        item.className = "masonry-item";
-        item.setAttribute("data-index", idx);
-        
-        item.innerHTML = `
-            <img src="${img.url}" alt="${img.caption}" loading="lazy">
-            <div class="masonry-caption-overlay">
-                <h4 class="masonry-caption-title">${img.caption || img.projectTitle}</h4>
-                <p class="masonry-caption-project" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-color); margin-top: 0.3rem;">${img.projectTitle}</p>
-            </div>
-        `;
-        
-        container.appendChild(item);
-    });
+    const displayName = (img) => img.titre || img.caption || img.projectTitle || "";
 
-    // Configuration de la Lightbox globale pour l'index
-    setupGlobalLightbox(allImages);
-}
-
-// Visionneuse photo Lightbox sur la galerie globale
-function setupGlobalLightbox(images) {
-    const lightbox = document.getElementById("lightbox");
-    const lightboxImg = document.getElementById("lightbox-img");
-    const lightboxCaption = document.getElementById("lightbox-caption-text");
-    const closeBtn = document.getElementById("lightbox-close-btn");
-    const prevBtn = document.getElementById("lightbox-prev-btn");
-    const nextBtn = document.getElementById("lightbox-next-btn");
-    const items = document.querySelectorAll(".masonry-item");
-    
-    let currentIndex = 0;
-
-    if (!lightbox || images.length === 0) return;
-
-    const openLightbox = (index) => {
-        currentIndex = parseInt(index);
-        updateLightboxContent();
-        lightbox.classList.add("open");
-        lightbox.setAttribute("aria-hidden", "false");
-        document.body.style.overflow = "hidden";
+    const sorters = {
+        defaut: (list) => list,
+        date: (list) => [...list].sort((a, b) => {
+            if (!a.date && !b.date) return 0;
+            if (!a.date) return 1;
+            if (!b.date) return -1;
+            return b.date.localeCompare(a.date);
+        }),
+        nom: (list) => [...list].sort((a, b) => displayName(a).localeCompare(displayName(b), "fr")),
+        type: (list) => [...list].sort((a, b) =>
+            (a.type || "zzz").localeCompare(b.type || "zzz", "fr") || displayName(a).localeCompare(displayName(b), "fr"))
     };
 
-    const closeLightbox = () => {
-        lightbox.classList.remove("open");
-        lightbox.setAttribute("aria-hidden", "true");
-        document.body.style.overflow = "";
-    };
+    let currentType = "tous";
+    let currentSort = (settings && settings.galerieSort) || "defaut";
+    if (!sorters[currentSort]) currentSort = "defaut";
 
-    const updateLightboxContent = () => {
-        const imgData = images[currentIndex];
-        if (imgData) {
-            lightboxImg.src = imgData.url;
-            lightboxCaption.innerHTML = `<strong>${imgData.caption || imgData.projectTitle}</strong> <span style="margin: 0 0.5rem; color: var(--accent-color);">|</span> ${imgData.projectTitle}`;
+    const renderGrid = () => {
+        const filtered = currentType === "tous" ? allImages : allImages.filter(i => i.type === currentType);
+        const list = sorters[currentSort](filtered);
+
+        container.innerHTML = "";
+        if (list.length === 0) {
+            container.innerHTML = `<p class="no-images">Aucune photographie pour ce filtre.</p>`;
+            return;
         }
-    };
 
-    const showPrev = () => {
-        currentIndex = (currentIndex - 1 + images.length) % images.length;
-        updateLightboxContent();
-    };
+        list.forEach((img, idx) => {
+            const item = document.createElement("div");
+            item.className = "masonry-item";
+            item.setAttribute("data-index", idx);
 
-    const showNext = () => {
-        currentIndex = (currentIndex + 1) % images.length;
-        updateLightboxContent();
-    };
-
-    items.forEach(item => {
-        item.addEventListener("click", () => {
-            openLightbox(item.getAttribute("data-index"));
+            const metaParts = [img.sousTitre, img.lieu, img.date ? new Date(img.date + "T00:00:00").toLocaleDateString("fr-FR", { year: "numeric", month: "long" }) : ""].filter(Boolean);
+            item.innerHTML = `
+                <img src="${img.url}" alt="${displayName(img)}" loading="lazy">
+                <div class="masonry-caption-overlay">
+                    <h4 class="masonry-caption-title">${displayName(img)}</h4>
+                    <p class="masonry-caption-project">${metaParts.join(" — ") || img.projectTitle}</p>
+                </div>
+            `;
+            container.appendChild(item);
         });
-    });
 
-    closeBtn.addEventListener("click", closeLightbox);
-    prevBtn.addEventListener("click", showPrev);
-    nextBtn.addEventListener("click", showNext);
+        // Lightbox recâblée sur la liste affichée (module partagé js/theme-lightbox.js)
+        setupSharedLightbox(list, ".masonry-item", (imgData) => {
+            const extra = [imgData.sousTitre, imgData.lieu, imgData.description].filter(Boolean).join(" — ");
+            return `<strong>${displayName(imgData)}</strong>${extra ? ` <span class="lightbox-caption-sep">|</span> ${extra}` : ` <span class="lightbox-caption-sep">|</span> ${imgData.projectTitle}`}`;
+        });
+    };
 
-    lightbox.addEventListener("click", (e) => {
-        if (e.target === lightbox || e.target === lightbox.querySelector('.lightbox-content')) {
-            closeLightbox();
-        }
-    });
+    // Barre de filtres/tri (présente uniquement sur galerie.html)
+    const typeFilters = document.getElementById("galerie-type-filters");
+    const sortSelect = document.getElementById("galerie-sort-select");
 
-    document.addEventListener("keydown", (e) => {
-        if (!lightbox.classList.contains("open")) return;
-        if (e.key === "Escape") closeLightbox();
-        else if (e.key === "ArrowLeft") showPrev();
-        else if (e.key === "ArrowRight") showNext();
-    });
+    if (typeFilters) {
+        const types = [...new Set(allImages.map(i => i.type).filter(Boolean))].sort((a, b) => a.localeCompare(b, "fr"));
+        typeFilters.innerHTML = "";
+        ["tous", ...types].forEach(t => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "galerie-filter-btn" + (t === currentType ? " active" : "");
+            btn.textContent = t === "tous" ? "Toutes" : t;
+            btn.addEventListener("click", () => {
+                currentType = t;
+                typeFilters.querySelectorAll(".galerie-filter-btn").forEach(b => b.classList.toggle("active", b === btn));
+                renderGrid();
+            });
+            typeFilters.appendChild(btn);
+        });
+        // Pas de types renseignés : filtres inutiles, on cache la rangée
+        if (types.length === 0) typeFilters.style.display = "none";
+    }
+
+    if (sortSelect) {
+        sortSelect.value = currentSort;
+        sortSelect.addEventListener("change", () => {
+            currentSort = sortSelect.value;
+            renderGrid();
+        });
+    }
+
+    renderGrid();
 }
 
 // Remplit la section Presse & Distinctions
@@ -462,11 +398,11 @@ function renderContact(contact) {
     const emailEl = document.getElementById("contact-email");
     const phoneEl = document.getElementById("contact-phone");
     const addressEl = document.getElementById("contact-address");
-    if (emailEl) {
+    if (emailEl && contact.email) {
         emailEl.href = `mailto:${contact.email}`;
         emailEl.textContent = contact.email;
     }
-    if (phoneEl) {
+    if (phoneEl && contact.telephone) {
         phoneEl.href = `tel:${contact.telephone.replace(/\s+/g, '')}`;
         phoneEl.textContent = contact.telephone;
     }
@@ -540,42 +476,5 @@ function setupContactForm() {
                 submitBtn.disabled = false;
             }
         });
-    }
-}
-
-// Affiche une notification toast rapide
-function showToast(message) {
-    // Crée le toast s'il n'existe pas (utile si importé sur index)
-    let toast = document.getElementById("toast-notification");
-    if (!toast) {
-        toast = document.createElement("div");
-        toast.id = "toast-notification";
-        toast.className = "toast-notification";
-        toast.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span id="toast-message"></span>`;
-        document.body.appendChild(toast);
-        
-        // CSS injecté dynamiquement si absent
-        const style = document.createElement("style");
-        style.textContent = `
-            .toast-notification {
-                position: fixed; bottom: 2rem; right: 2rem; background-color: var(--secondary-color);
-                color: var(--primary-color); padding: 1rem 2rem; border-radius: 4px;
-                display: flex; align-items: center; gap: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-                z-index: 10000; transform: translateY(150%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                font-size: 0.9rem; font-family: var(--font-body); border-left: 3px solid var(--accent-color);
-            }
-            .toast-notification.show { transform: translateY(0); }
-            .toast-notification i { color: var(--accent-color); font-size: 1.2rem; }
-        `;
-        document.head.appendChild(style);
-    }
-    
-    const msgEl = document.getElementById("toast-message");
-    if (msgEl) {
-        msgEl.textContent = message;
-        toast.classList.add("show");
-        setTimeout(() => {
-            toast.classList.remove("show");
-        }, 3000);
     }
 }

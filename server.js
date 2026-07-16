@@ -69,7 +69,14 @@ function initDB() {
 /* Seed initial de l'authentification */
 function initAuth() {
     if (!fs.existsSync(AUTH_FILE)) {
-        const defaultPassword = process.env.ADMIN_PASSWORD || "GregoryBaudin@2026";
+        if (!process.env.ADMIN_PASSWORD) {
+            if (process.env.NODE_ENV === "production") {
+                console.error("[AUTH] ERREUR : la variable d'environnement ADMIN_PASSWORD est obligatoire en production.");
+                process.exit(1);
+            }
+            console.warn("[AUTH] ADMIN_PASSWORD non défini — mot de passe de développement utilisé (local uniquement).");
+        }
+        const defaultPassword = process.env.ADMIN_PASSWORD || "dev-local-only";
         const hash = bcrypt.hashSync(defaultPassword, 12);
         writeJSON(AUTH_FILE, {
             passwordHash: hash,
@@ -423,6 +430,18 @@ app.get("/api/stats", requireAuth, (req, res) => {
 });
 
 /* ---------- FICHIERS STATIQUES ---------- */
+/* Accès admin via URL secrète uniquement (configurable via ADMIN_PATH).
+   En production, la variable est obligatoire : aucun chemin par défaut ne doit
+   figurer dans le code source public. */
+if (!process.env.ADMIN_PATH && process.env.NODE_ENV === "production") {
+    console.error("[ADMIN] ERREUR : la variable d'environnement ADMIN_PATH est obligatoire en production (ex: /mon-chemin-secret).");
+    process.exit(1);
+}
+const ADMIN_PATH = process.env.ADMIN_PATH || "/gestion";
+app.get(ADMIN_PATH, (req, res) => res.sendFile(path.join(__dirname, "admin.html")));
+/* Les anciennes adresses admin ne répondent plus (doit précéder le static) */
+app.get(["/admin", "/admin.html"], (req, res) => res.status(404).send("Not found"));
+
 app.use("/uploads", express.static(UPLOAD_DIR, { maxAge: "7d", immutable: true }));
 app.use(express.static(__dirname, {
     extensions: ["html"],
@@ -434,9 +453,6 @@ app.use(express.static(__dirname, {
         }
     }
 }));
-
-/* Route explicite admin */
-app.get("/admin", (req, res) => res.sendFile(path.join(__dirname, "admin.html")));
 
 /* Santé (pour Render) */
 app.get("/healthz", (req, res) => res.json({ status: "ok" }));

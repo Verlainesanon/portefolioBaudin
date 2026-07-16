@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=3">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="loading">
@@ -73,6 +73,19 @@
             </div>
             <p class="galerie-intro">Un aperçu de scènes quotidiennes, de silences et de regards glanés au fil des ans.</p>
 
+            <div class="galerie-filter-bar" id="galerie-filter-bar">
+                <div class="galerie-type-filters" id="galerie-type-filters"></div>
+                <label class="galerie-sort-label">
+                    Trier par
+                    <select id="galerie-sort-select" class="galerie-sort-select">
+                        <option value="defaut">Ordre original</option>
+                        <option value="date">Date (récent d'abord)</option>
+                        <option value="nom">Nom (A → Z)</option>
+                        <option value="type">Type</option>
+                    </select>
+                </label>
+            </div>
+
             <div class="galerie-masonry-wrapper" id="galerie-masonry-container">
                 <!-- Rempli par JS -->
             </div>
@@ -97,8 +110,9 @@
         <p class="footer-sub">Photographie Documentaire &amp; Témoignage Social</p>
     </footer>
 
-    <script src="data/content.js"></script>
-    <script src="js/portfolio.js"></script>
-    <script src="js/animations.js"></script>
+    <script src="data/content.js?v=3"></script>
+    <script src="js/theme-lightbox.js?v=3"></script>
+    <script src="js/portfolio.js?v=3"></script>
+    <script src="js/animations.js?v=3"></script>
 </body>
 </html>

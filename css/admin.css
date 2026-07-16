@@ -750,7 +750,8 @@ body.admin-body {
     object-fit: cover;
 }
 
-.gallery-thumb-card input {
+.gallery-thumb-card input,
+.gallery-thumb-card textarea {
     background-color: #FFFFFF;
     border: 1px solid var(--border-color);
     border-radius: 2px;
@@ -758,6 +759,21 @@ body.admin-body {
     color: var(--text-primary);
     font-size: 0.8rem;
     outline: none;
+}
+
+.gallery-thumb-card textarea {
+    resize: vertical;
+    font-family: inherit;
+}
+
+.photo-meta-row {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.photo-meta-row input {
+    min-width: 0;
+    flex: 1;
 }
 
 .delete-photo-btn {

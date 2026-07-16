@@ -71,52 +71,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 7. Rendu de la galerie photos (Masonry)
     renderProjectGallery(currentProject.images);
 
-    // 8. Configuration de la Lightbox
-    setupLightbox(currentProject.images);
+    // 8. Configuration de la Lightbox (module partagé js/theme-lightbox.js)
+    setupSharedLightbox(currentProject.images, ".gallery-item", (imgData) => imgData.caption || "");
 
     // 9. Configuration des boutons Précédent / Suivant
     setupProjectNavigation(projets, projectIndex);
 });
 
-// Applique le thème à la page projet
-function applyThemeSettings(theme) {
-    if (!theme) return;
-    const root = document.documentElement;
-    if (theme.primaryColor) root.style.setProperty("--primary-color", theme.primaryColor);
-    if (theme.secondaryColor) root.style.setProperty("--secondary-color", theme.secondaryColor);
-    if (theme.accentColor) root.style.setProperty("--accent-color", theme.accentColor);
-    if (theme.fontTitle) root.style.setProperty("--font-title", `'${theme.fontTitle}', serif`);
-    if (theme.fontBody) root.style.setProperty("--font-body", `'${theme.fontBody}', sans-serif`);
-
-    // Gère la classe de thème sur le body
-    const savedTheme = localStorage.getItem("portfolio_theme_mode");
-    if (savedTheme === "dark" || (savedTheme === null && theme.darkMode === true)) {
-        document.body.classList.add("dark-theme");
-        updateThemeToggleIcons(true);
-    } else {
-        document.body.classList.remove("dark-theme");
-        updateThemeToggleIcons(false);
-    }
-}
-
-// Bouton de toggle mode nuit sur la page projet
-function setupThemeToggle() {
-    const toggleBtn = document.getElementById("theme-toggle-btn");
-    if (toggleBtn) {
-        toggleBtn.addEventListener("click", () => {
-            const isDark = document.body.classList.toggle("dark-theme");
-            localStorage.setItem("portfolio_theme_mode", isDark ? "dark" : "light");
-            updateThemeToggleIcons(isDark);
-        });
-    }
-}
-
-function updateThemeToggleIcons(isDark) {
-    const icon = document.querySelector(".theme-toggle-btn i");
-    if (icon) {
-        icon.className = isDark ? "fa-solid fa-sun" : "fa-solid fa-moon";
-    }
-}
+// (Thème et toggle : voir js/theme-lightbox.js)
 
 // Remplit les textes de description
 function renderProjectTexts(project) {
@@ -129,7 +91,7 @@ function renderProjectTexts(project) {
     if (descTextContainer && project.description) {
         descTextContainer.innerHTML = project.description
             .split("\n\n")
-            .map(para => `<p style="margin-bottom: 1.5rem;">${para.replace(/\n/g, "<br>")}</p>`)
+            .map(para => `<p class="project-desc-para">${para.replace(/\n/g, "<br>")}</p>`)
             .join("");
     }
 
@@ -198,76 +160,6 @@ function renderProjectGallery(images) {
             </div>
         `;
         container.appendChild(item);
-    });
-}
-
-// Visionneuse photo Lightbox (avec navigation de la série)
-function setupLightbox(images) {
-    const lightbox = document.getElementById("lightbox");
-    const lightboxImg = document.getElementById("lightbox-img");
-    const lightboxCaption = document.getElementById("lightbox-caption-text");
-    const closeBtn = document.getElementById("lightbox-close-btn");
-    const prevBtn = document.getElementById("lightbox-prev-btn");
-    const nextBtn = document.getElementById("lightbox-next-btn");
-    const items = document.querySelectorAll(".gallery-item");
-    
-    let currentIndex = 0;
-
-    if (!lightbox || !images || images.length === 0) return;
-
-    const openLightbox = (index) => {
-        currentIndex = parseInt(index);
-        updateLightboxContent();
-        lightbox.classList.add("open");
-        lightbox.setAttribute("aria-hidden", "false");
-        document.body.style.overflow = "hidden";
-    };
-
-    const closeLightbox = () => {
-        lightbox.classList.remove("open");
-        lightbox.setAttribute("aria-hidden", "true");
-        document.body.style.overflow = "";
-    };
-
-    const updateLightboxContent = () => {
-        const imgData = images[currentIndex];
-        if (imgData) {
-            lightboxImg.src = imgData.url;
-            lightboxCaption.textContent = imgData.caption || "";
-        }
-    };
-
-    const showPrev = () => {
-        currentIndex = (currentIndex - 1 + images.length) % images.length;
-        updateLightboxContent();
-    };
-
-    const showNext = () => {
-        currentIndex = (currentIndex + 1) % images.length;
-        updateLightboxContent();
-    };
-
-    items.forEach(item => {
-        item.addEventListener("click", () => {
-            openLightbox(item.getAttribute("data-index"));
-        });
-    });
-
-    closeBtn.addEventListener("click", closeLightbox);
-    prevBtn.addEventListener("click", showPrev);
-    nextBtn.addEventListener("click", showNext);
-
-    lightbox.addEventListener("click", (e) => {
-        if (e.target === lightbox || e.target === lightbox.querySelector('.lightbox-content')) {
-            closeLightbox();
-        }
-    });
-
-    document.addEventListener("keydown", (e) => {
-        if (!lightbox.classList.contains("open")) return;
-        if (e.key === "Escape") closeLightbox();
-        else if (e.key === "ArrowLeft") showPrev();
-        else if (e.key === "ArrowRight") showNext();
     });
 }
 

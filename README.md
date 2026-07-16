@@ -44,7 +44,7 @@ Portfolio éditorial haut de gamme avec **administration complète sécurisée**
 2. Sur [render.com](https://render.com) → **New → Web Service** → connecter le repo
 3. Render détecte `render.yaml` automatiquement (ou : Build `npm install`, Start `node server.js`)
 4. Dans **Environment**, définir :
-   - `ADMIN_PASSWORD` : mot de passe admin initial
+   - `ADMIN_PASSWORD` : mot de passe admin initial — **obligatoire** : en production, le serveur refuse de démarrer sans cette variable (plus aucun mot de passe par défaut dans le code)
    - `JWT_SECRET` : généré automatiquement via render.yaml
 5. Déployer — le site est en ligne ✅
 
