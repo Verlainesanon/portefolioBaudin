@@ -482,9 +482,9 @@ body.dark-theme .main-header.scrolled {
                 visibility 0s;
 }
 
-/* Sur grand écran (nav desktop visible), le menu mobile n'a aucune raison d'exister.
-   Aligné sur le breakpoint 1360px où le burger apparaît. */
-@media (min-width: 1361px) {
+/* Sur tablette et PC (nav onglets visible), le menu mobile n'existe pas.
+   Aligné sur le breakpoint 767px où le burger apparaît. */
+@media (min-width: 768px) {
     .mobile-nav-overlay { display: none; }
 }
 
@@ -1682,7 +1682,28 @@ body.dark-theme .project-hero-overlay {
 /* ==================================================
    RESPONSIVE DESIGN
    ================================================== */
+/* ===== Navigation responsive =====
+   PC + Tablette : onglets visibles (taille progressive)
+   Téléphone (< 768px) : menu burger (3 barres) */
 @media (max-width: 1360px) {
+    .desktop-nav { gap: 1.6rem; }
+    .desktop-nav a { font-size: 0.74rem; letter-spacing: 0.1em; }
+}
+
+@media (max-width: 1100px) {
+    .desktop-nav { gap: 1.15rem; }
+    .desktop-nav a { font-size: 0.68rem; letter-spacing: 0.07em; }
+    .logo a { font-size: 1.3rem; }
+}
+
+@media (max-width: 920px) {
+    .desktop-nav { gap: 0.85rem; }
+    .desktop-nav a { font-size: 0.62rem; letter-spacing: 0.05em; }
+    .logo a { font-size: 1.15rem; }
+    .main-header, .main-header.scrolled { padding: 1.3rem 1.5rem; }
+}
+
+@media (max-width: 767px) {
     .desktop-nav { display: none; }
     .header-right-mobile { display: flex; }
 }
