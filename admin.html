@@ -50,12 +50,15 @@
                 <span class="nav-group-label">Pilotage</span>
                 <button class="nav-tab active" data-target="tab-dashboard"><i class="fa-solid fa-chart-line"></i> Tableau de bord</button>
                 <button class="nav-tab" data-target="tab-messages"><i class="fa-solid fa-envelope"></i> Messages reçus <span id="unread-badge" class="unread-badge" style="display:none;"></span></button>
+                <button class="nav-tab" data-target="tab-comments"><i class="fa-solid fa-comments"></i> Commentaires <span id="pending-comments-badge" class="unread-badge" style="display:none;"></span></button>
                 <span class="nav-group-label">Contenu</span>
                 <button class="nav-tab" data-target="tab-identity"><i class="fa-solid fa-id-card"></i> Identité &amp; Thème</button>
                 <button class="nav-tab" data-target="tab-apropos"><i class="fa-solid fa-user-tie"></i> À Propos &amp; Parcours</button>
                 <button class="nav-tab" data-target="tab-projects"><i class="fa-solid fa-folder-open"></i> Projets &amp; Reportages</button>
                 <button class="nav-tab" data-target="tab-vitrine"><i class="fa-solid fa-star"></i> Presse, Avis &amp; Services</button>
                 <button class="nav-tab" data-target="tab-media"><i class="fa-solid fa-photo-film"></i> Médiathèque</button>
+                <button class="nav-tab" data-target="tab-videos"><i class="fa-solid fa-film"></i> Vidéos</button>
+                <button class="nav-tab" data-target="tab-vedette"><i class="fa-solid fa-star"></i> À la une</button>
                 <button class="nav-tab" data-target="tab-contact"><i class="fa-solid fa-address-book"></i> Contacts &amp; Réseaux</button>
                 <span class="nav-group-label">Configuration</span>
                 <button class="nav-tab" data-target="tab-seo"><i class="fa-solid fa-magnifying-glass-chart"></i> SEO &amp; Réglages du site</button>
@@ -470,6 +473,54 @@
                     </div>
                 </div>
 
+                <!-- 4bis. VIDÉOS -->
+                <div class="tab-panel" id="tab-videos">
+                    <div class="admin-card full-width">
+                        <div class="card-header-flex">
+                            <h3>Vidéos de la galerie</h3>
+                            <div class="upload-actions">
+                                <input type="file" id="video-upload-input" accept="video/mp4,video/webm,video/ogg" class="file-input-hide">
+                                <label for="video-upload-input" class="upload-trigger-btn btn-sm"><i class="fa-solid fa-cloud-arrow-up"></i> Téléverser un fichier vidéo</label>
+                                <button type="button" id="add-video-link-btn" class="admin-btn accent-btn btn-sm"><i class="fa-solid fa-link"></i> Ajouter un lien (YouTube/Vimeo)</button>
+                            </div>
+                        </div>
+                        <p class="form-tip">Fichier vidéo : MP4/WEBM/OGG, 100 Mo max. Lien : collez l'URL YouTube ou Vimeo complète.</p>
+                        <div id="videos-list-container" class="experiences-list-editor"></div>
+                        <div class="form-actions">
+                            <button type="button" id="save-videos-btn" class="admin-btn primary-btn"><i class="fa-solid fa-floppy-disk"></i> Enregistrer les vidéos</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4ter. À LA UNE -->
+                <div class="tab-panel" id="tab-vedette">
+                    <div class="admin-card full-width">
+                        <h3>Contenu actuellement à la une</h3>
+                        <div id="vedette-status" class="form-tip">Chargement…</div>
+                        <button type="button" id="vedette-remove-btn" class="admin-btn danger-btn btn-sm" style="display:none; margin-top:0.8rem;"><i class="fa-solid fa-xmark"></i> Retirer de la une</button>
+                    </div>
+                    <div class="admin-card full-width">
+                        <h3>Mettre un contenu à la une</h3>
+                        <div class="form-group">
+                            <label for="vedette-type-select">Type de contenu</label>
+                            <select id="vedette-type-select">
+                                <option value="photo">Photo</option>
+                                <option value="video">Vidéo</option>
+                                <option value="commentaire">Commentaire</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="vedette-item-select">Contenu à mettre en avant</label>
+                            <select id="vedette-item-select"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="vedette-duree-input">Durée d'affichage (en heures)</label>
+                            <input type="number" id="vedette-duree-input" min="1" value="24">
+                        </div>
+                        <button type="button" id="vedette-publish-btn" class="admin-btn primary-btn"><i class="fa-solid fa-star"></i> Publier à la une</button>
+                    </div>
+                </div>
+
                 <!-- 5. MESSAGES REÇUS -->
                 <div class="tab-panel" id="tab-messages">
                     <div class="admin-card full-width">
@@ -479,6 +530,19 @@
                         </div>
                         <div id="messages-list-container" class="messages-list-container">
                             <!-- Messages injectés par JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5ter. COMMENTAIRES SUR PHOTOS -->
+                <div class="tab-panel" id="tab-comments">
+                    <div class="admin-card full-width">
+                        <div class="card-header-flex">
+                            <h3>Modération des commentaires</h3>
+                            <button type="button" id="refresh-comments-btn" class="admin-btn secondary-btn btn-sm"><i class="fa-solid fa-rotate"></i> Actualiser</button>
+                        </div>
+                        <div id="comments-list-container" class="messages-list-container">
+                            <!-- Commentaires injectés par JS -->
                         </div>
                     </div>
                 </div>

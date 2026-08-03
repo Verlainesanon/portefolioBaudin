@@ -103,6 +103,7 @@ app.use(helmet({
             fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
             imgSrc: ["'self'", "data:", "blob:"],
             connectSrc: ["'self'"],
+            frameSrc: ["'self'", "https://www.youtube.com", "https://player.vimeo.com"],
             objectSrc: ["'none'"],
             frameAncestors: ["'none'"],
             baseUri: ["'self'"],
@@ -230,12 +231,16 @@ app.get("/api/auth/verify", requireAuth, (req, res) => {
 /* Lecture publique (le portfolio se charge depuis l'API) */
 app.get("/api/content", (req, res) => {
     const data = readJSON(DB_FILE, {});
+    if (data.vedette && data.vedette.expiresAt && new Date(data.vedette.expiresAt).getTime() <= Date.now()) {
+        data.vedette = null;
+        writeJSON(DB_FILE, data);
+    }
     res.set("Cache-Control", "no-store");
     res.json(data);
 });
 
 /* Structure autorisée (whitelist anti-injection de clés) */
-const ALLOWED_KEYS = ["theme", "identity", "apropos", "experiences", "projets", "contact", "seo", "settings"];
+const ALLOWED_KEYS = ["theme", "identity", "apropos", "experiences", "projets", "contact", "seo", "settings", "presse", "temoignages", "services", "videos", "vedette"];
 
 function sanitizeContent(input) {
     if (typeof input !== "object" || input === null || Array.isArray(input)) return null;
@@ -246,6 +251,8 @@ function sanitizeContent(input) {
     // Validations minimales de structure
     if (out.experiences && !Array.isArray(out.experiences)) return null;
     if (out.projets && !Array.isArray(out.projets)) return null;
+    if (out.videos && !Array.isArray(out.videos)) return null;
+    if (out.vedette !== undefined && out.vedette !== null && typeof out.vedette !== "object") return null;
     return out;
 }
 
@@ -297,6 +304,28 @@ async function reencodeImage(buffer, mimetype) {
     }
     return { buffer: await pipeline.toBuffer(), mimetype };
 }
+
+/* ---------- Upload de vidéos (fichier direct, stocké sur disque) ---------- */
+const ALLOWED_VIDEO_MIME = { "video/mp4": ".mp4", "video/webm": ".webm", "video/ogg": ".ogv" };
+const videoUpload = multer({
+    storage: multer.diskStorage({
+        destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+        filename: (req, file, cb) => cb(null, `vid_${Date.now()}_${crypto.randomBytes(6).toString("hex")}${ALLOWED_VIDEO_MIME[file.mimetype] || ".mp4"}`)
+    }),
+    limits: { fileSize: 100 * 1024 * 1024, files: 1 },
+    fileFilter: (req, file, cb) => {
+        if (ALLOWED_VIDEO_MIME[file.mimetype]) cb(null, true);
+        else cb(new Error("Type de fichier non autorisé (MP4, WEBM, OGG uniquement)."));
+    }
+});
+
+app.post("/api/upload-video", requireAuth, (req, res) => {
+    videoUpload.single("video")(req, res, (err) => {
+        if (err) return res.status(400).json({ error: err.message });
+        if (!req.file) return res.status(400).json({ error: "Aucun fichier reçu." });
+        res.json({ success: true, url: `/uploads/${req.file.filename}` });
+    });
+});
 
 app.post("/api/upload", requireAuth, (req, res) => {
     upload.array("images", 12)(req, res, async (err) => {
@@ -360,6 +389,64 @@ app.delete("/api/messages/:id", requireAuth, (req, res) => {
     let messages = readJSON(MESSAGES_FILE, []);
     messages = messages.filter(m => m.id !== req.params.id);
     writeJSON(MESSAGES_FILE, messages);
+    res.json({ success: true });
+});
+
+/* ---------- COMMENTAIRES SUR PHOTOS (modération admin) ---------- */
+const COMMENTS_FILE = path.join(DATA_DIR, "comments.json");
+const commentsLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 20, message: { error: "Trop de commentaires envoyés. Réessayez plus tard." } });
+
+/* Public : liste des commentaires approuvés pour une photo */
+app.get("/api/comments", (req, res) => {
+    const { photoUrl } = req.query;
+    const comments = readJSON(COMMENTS_FILE, []);
+    const visible = comments.filter(c => c.visible && (!photoUrl || c.photoUrl === photoUrl));
+    res.json(visible.map(({ id, photoUrl, nom, anonyme, message, date }) => ({ id, photoUrl, nom, anonyme, message, date })));
+});
+
+/* Public : poster un commentaire (masqué par défaut, en attente de modération) */
+app.post("/api/comments", commentsLimiter, (req, res) => {
+    const { photoUrl, nom, anonyme, message } = req.body || {};
+    if (typeof photoUrl !== "string" || typeof message !== "string" || !photoUrl.trim() || !message.trim()) {
+        return res.status(400).json({ error: "Champs manquants." });
+    }
+    if (photoUrl.length > 500 || message.length > 1000 || (nom && String(nom).length > 100)) {
+        return res.status(400).json({ error: "Données invalides." });
+    }
+    const isAnon = !!anonyme;
+    const comments = readJSON(COMMENTS_FILE, []);
+    comments.unshift({
+        id: crypto.randomUUID(),
+        photoUrl: photoUrl.trim().slice(0, 500),
+        nom: isAnon ? "" : String(nom || "").trim().slice(0, 100),
+        anonyme: isAnon,
+        message: message.trim().slice(0, 1000),
+        visible: false,
+        date: new Date().toISOString()
+    });
+    writeJSON(COMMENTS_FILE, comments.slice(0, 2000));
+    res.json({ success: true });
+});
+
+/* Admin : tous les commentaires (pour modération) */
+app.get("/api/comments/all", requireAuth, (req, res) => {
+    res.json(readJSON(COMMENTS_FILE, []));
+});
+
+/* Admin : approuver / masquer un commentaire */
+app.patch("/api/comments/:id", requireAuth, (req, res) => {
+    const comments = readJSON(COMMENTS_FILE, []);
+    const c = comments.find(c => c.id === req.params.id);
+    if (!c) return res.status(404).json({ error: "Commentaire introuvable." });
+    c.visible = !!req.body.visible;
+    writeJSON(COMMENTS_FILE, comments);
+    res.json({ success: true });
+});
+
+app.delete("/api/comments/:id", requireAuth, (req, res) => {
+    let comments = readJSON(COMMENTS_FILE, []);
+    comments = comments.filter(c => c.id !== req.params.id);
+    writeJSON(COMMENTS_FILE, comments);
     res.json({ success: true });
 });
 

@@ -32,6 +32,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 6. Rendu de la Galerie Masonry Globale (avec filtres/tri sur la page galerie)
     renderMasonryGallery(data.projets, data.settings);
 
+    // 6ter. Rendu des vidéos (galerie)
+    renderVideos(data.videos);
+
+    // 6quater. Rendu du contenu à la une (accueil uniquement)
+    renderVedette(data.vedette);
+
     // 6bis. Rendu Presse, Témoignages & Services
     renderPresse(data.presse);
     renderTemoignages(data.temoignages);
@@ -321,6 +327,74 @@ function renderMasonryGallery(projets, settings) {
     renderGrid();
 }
 
+// Rend la section Vidéos de la galerie (fichiers uploadés ou liens YouTube/Vimeo)
+function toEmbedUrl(url) {
+    const yt = url.match(/(?:youtu\.be\/|youtube\.com\/watch\?v=|youtube\.com\/embed\/)([\w-]+)/);
+    if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+    const vimeo = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+    return url;
+}
+
+function renderVideos(videos) {
+    const container = document.getElementById("videos-container");
+    if (!container) return;
+
+    if (!videos || videos.length === 0) {
+        container.innerHTML = "";
+        container.style.display = "none";
+        return;
+    }
+    container.style.display = "";
+
+    container.innerHTML = videos.map(v => {
+        const media = v.type === "upload"
+            ? `<video src="${v.url}" controls preload="metadata"></video>`
+            : `<iframe src="${toEmbedUrl(v.url)}" allowfullscreen loading="lazy"></iframe>`;
+        return `
+            <div class="video-item">
+                ${media}
+                <h4 class="video-titre">${v.titre || ""}</h4>
+            </div>
+        `;
+    }).join("");
+}
+
+// Rend la section "À la une" (photo, vidéo ou commentaire choisi par l'admin, avec expiration)
+function renderVedette(vedette) {
+    const container = document.getElementById("vedette-container");
+    const section = document.getElementById("vedette");
+    if (!container) return;
+
+    if (!vedette) {
+        container.innerHTML = `<p class="no-projects">Rien à la une pour le moment.</p>`;
+        return;
+    }
+
+    if (vedette.type === "photo") {
+        container.innerHTML = `
+            <figure class="vedette-photo">
+                <img src="${vedette.url}" alt="${escapeHtml(vedette.titre || "")}">
+                <figcaption>${escapeHtml(vedette.titre || "")}</figcaption>
+            </figure>
+        `;
+    } else if (vedette.type === "video") {
+        const media = vedette.videoType === "upload"
+            ? `<video src="${vedette.url}" controls preload="metadata"></video>`
+            : `<iframe src="${toEmbedUrl(vedette.url)}" allowfullscreen loading="lazy"></iframe>`;
+        container.innerHTML = `<div class="vedette-video">${media}<p class="video-titre">${escapeHtml(vedette.titre || "")}</p></div>`;
+    } else if (vedette.type === "commentaire") {
+        container.innerHTML = `
+            <blockquote class="vedette-commentaire">
+                <p>"${escapeHtml(vedette.message || "")}"</p>
+                <cite>— ${escapeHtml(vedette.nom || "Anonyme")}</cite>
+            </blockquote>
+        `;
+    } else {
+        container.innerHTML = `<p class="no-projects">Rien à la une pour le moment.</p>`;
+    }
+}
+
 // Remplit la section Presse & Distinctions
 function renderPresse(presse) {
     const container = document.getElementById("presse-container");
@@ -335,11 +409,19 @@ function renderPresse(presse) {
     presse.forEach(p => {
         const row = document.createElement("article");
         row.className = "presse-item";
+        const hasArticle = p.contenu && p.contenu.trim();
+        const titreHtml = hasArticle
+            ? (p.titre || "")
+            : (p.lien && p.lien !== "#" ? `<a href="${p.lien}" target="_blank" rel="noopener noreferrer">${p.titre || ""}</a>` : (p.titre || ""));
+        const articleHtml = hasArticle
+            ? `<details class="presse-article"><summary>Lire l'article complet</summary>${p.contenu.split("\n\n").map(para => `<p>${para.replace(/\n/g, "<br>")}</p>`).join("")}</details>`
+            : "";
         row.innerHTML = `
             <span class="presse-annee">${p.annee || ""}</span>
             <div class="presse-info">
                 <span class="presse-media">${p.media || ""}</span>
-                <h3 class="presse-titre">${p.lien && p.lien !== "#" ? `<a href="${p.lien}" target="_blank" rel="noopener noreferrer">${p.titre || ""}</a>` : (p.titre || "")}</h3>
+                <h3 class="presse-titre">${titreHtml}</h3>
+                ${articleHtml}
             </div>
         `;
         container.appendChild(row);

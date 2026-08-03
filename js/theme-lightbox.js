@@ -116,6 +116,7 @@ function setupSharedLightbox(images, itemSelector, renderCaption) {
         if (imgData) {
             lightboxImg.src = imgData.url;
             lightboxCaption.innerHTML = renderCaption(imgData);
+            loadCommentsPanel(imgData.url);
         }
     };
 
@@ -157,4 +158,93 @@ function setupSharedLightbox(images, itemSelector, renderCaption) {
         else if (e.key === "ArrowRight") showNext();
     };
     document.addEventListener("keydown", window.__lightboxKeyHandler);
+}
+
+/* --------------------------------------------------
+   Commentaires sous chaque photo (lightbox)
+   -------------------------------------------------- */
+function escapeHtml(str) {
+    return String(str || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function getCommentsPanel() {
+    const content = document.querySelector(".lightbox-content");
+    if (!content) return null;
+    let panel = document.getElementById("lightbox-comments");
+    if (!panel) {
+        panel = document.createElement("div");
+        panel.id = "lightbox-comments";
+        panel.className = "lightbox-comments";
+        content.appendChild(panel);
+    }
+    return panel;
+}
+
+async function loadCommentsPanel(photoUrl) {
+    const panel = getCommentsPanel();
+    if (!panel) return;
+    panel.dataset.photoUrl = photoUrl;
+    panel.innerHTML = `<p class="lightbox-comments-loading">Chargement des commentaires…</p>`;
+
+    let comments = [];
+    try {
+        const res = await fetch(`/api/comments?photoUrl=${encodeURIComponent(photoUrl)}`);
+        comments = res.ok ? await res.json() : [];
+    } catch {
+        comments = [];
+    }
+
+    // Ignore la réponse si l'utilisateur a déjà changé de photo entre-temps
+    if (panel.dataset.photoUrl !== photoUrl) return;
+
+    const listHtml = comments.length
+        ? comments.map(c => `
+            <div class="comment-item">
+                <span class="comment-author">${escapeHtml(c.anonyme || !c.nom ? "Anonyme" : c.nom)}</span>
+                <p class="comment-message">${escapeHtml(c.message)}</p>
+            </div>
+        `).join("")
+        : `<p class="lightbox-comments-empty">Aucun commentaire pour le moment.</p>`;
+
+    panel.innerHTML = `
+        <div class="lightbox-comments-list">${listHtml}</div>
+        <form class="lightbox-comment-form">
+            <label class="comment-anon-toggle">
+                <input type="checkbox" class="comment-anon-checkbox" checked> Publier anonymement
+            </label>
+            <input type="text" class="comment-nom-input" placeholder="Votre nom" style="display:none;" maxlength="100">
+            <textarea class="comment-message-input" placeholder="Votre commentaire…" rows="2" required maxlength="1000"></textarea>
+            <button type="submit" class="admin-btn accent-btn btn-sm">Envoyer</button>
+        </form>
+    `;
+
+    const form = panel.querySelector(".lightbox-comment-form");
+    const anonCheckbox = panel.querySelector(".comment-anon-checkbox");
+    const nomInput = panel.querySelector(".comment-nom-input");
+
+    anonCheckbox.addEventListener("change", () => {
+        nomInput.style.display = anonCheckbox.checked ? "none" : "block";
+    });
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const messageInput = panel.querySelector(".comment-message-input");
+        const message = messageInput.value.trim();
+        if (!message) return;
+        const anonyme = anonCheckbox.checked;
+        const nom = anonyme ? "" : nomInput.value.trim();
+
+        try {
+            const res = await fetch("/api/comments", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ photoUrl, anonyme, nom, message })
+            });
+            if (!res.ok) throw new Error();
+            showToast("Commentaire envoyé — visible après validation par l'administrateur.");
+            messageInput.value = "";
+        } catch {
+            showToast("Erreur lors de l'envoi du commentaire.");
+        }
+    });
 }

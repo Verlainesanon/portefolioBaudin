@@ -71,8 +71,11 @@ document.addEventListener("DOMContentLoaded", () => {
     setupProjectsCRUD();
     setupVitrineForm();
     setupMediaLibrary();
+    setupVideosTab();
+    setupVedetteTab();
     setupContactForm();
     setupMessagesTab();
+    setupCommentsTab();
     setupSeoForm();
     setupSystemTools();
 });
@@ -106,6 +109,7 @@ async function loadContentAndInit() {
     if (!currentData.seo) currentData.seo = { metaTitle: "", metaDescription: "", keywords: "" };
     initDashboardData();
     refreshMessages();
+    refreshComments();
     refreshStats();
 }
 
@@ -163,6 +167,7 @@ function setupTabs() {
             titleEl.textContent = tab.textContent.trim();
             const target = tab.getAttribute("data-target");
             if (target === "tab-messages") refreshMessages();
+            if (target === "tab-comments") refreshComments();
             if (target === "tab-dashboard") refreshStats();
             if (target === "tab-media") refreshMediaLibrary();
         });
@@ -270,6 +275,14 @@ function initDashboardData() {
 
     // Tab 3bis : Presse, Témoignages & Services
     VITRINE_LISTS.forEach(renderVitrineList);
+
+    // Tab 4bis : Vidéos
+    if (!currentData.videos) currentData.videos = [];
+    renderVideosList();
+
+    // Tab 4ter : À la une
+    renderVedetteStatus();
+    populateVedetteItemSelect();
 
     // Tab 4 : Contact
     document.getElementById("contact-email-input").value = currentData.contact?.email || "";
@@ -535,7 +548,8 @@ const VITRINE_LISTS = [
         fields: [
             { cls: "vit-media", key: "media", label: "Média / Institution", type: "text" },
             { cls: "vit-titre", key: "titre", label: "Titre de l'article ou de la distinction", type: "text" },
-            { cls: "vit-lien", key: "lien", label: "Lien (URL)", type: "text" },
+            { cls: "vit-lien", key: "lien", label: "Lien (URL, optionnel)", type: "text", optional: true },
+            { cls: "vit-contenu", key: "contenu", label: "Article complet (optionnel — publié directement sur le site)", type: "textarea", optional: true },
             { cls: "vit-annee", key: "annee", label: "Année", type: "text" }
         ]
     },
@@ -609,9 +623,10 @@ function renderVitrineList(list) {
         card.setAttribute("data-id", item.id);
 
         const fieldsHtml = list.fields.map(f => {
+            const req = f.optional ? "" : "required";
             const control = f.type === "textarea"
-                ? `<textarea class="${f.cls}" rows="3" required></textarea>`
-                : `<input type="text" class="${f.cls}" required>`;
+                ? `<textarea class="${f.cls}" rows="3" ${req}></textarea>`
+                : `<input type="text" class="${f.cls}" ${req}>`;
             const wide = f.type === "textarea" ? " full-field" : "";
             return `<div class="form-group${wide}"><label>${f.label}</label>${control}</div>`;
         }).join("");
@@ -1069,6 +1084,328 @@ async function refreshMessages() {
         });
     } catch (err) {
         console.warn("Erreur chargement messages:", err.message);
+    }
+}
+
+/* ==================================================
+   8ter. COMMENTAIRES SUR PHOTOS (modération)
+   ================================================== */
+function setupCommentsTab() {
+    const refreshBtn = document.getElementById("refresh-comments-btn");
+    if (refreshBtn) refreshBtn.addEventListener("click", refreshComments);
+}
+
+async function refreshComments() {
+    const container = document.getElementById("comments-list-container");
+    if (!container || !getToken()) return;
+
+    try {
+        const comments = await api("/api/comments/all");
+        const pending = comments.filter(c => !c.visible).length;
+        const badge = document.getElementById("pending-comments-badge");
+        if (badge) {
+            badge.textContent = pending;
+            badge.style.display = pending > 0 ? "inline-flex" : "none";
+        }
+
+        container.innerHTML = "";
+        if (comments.length === 0) {
+            container.innerHTML = `<p class="no-messages" style="color: var(--admin-text-muted, #888); padding: 1rem;">Aucun commentaire pour le moment.</p>`;
+            return;
+        }
+
+        comments.forEach(c => {
+            const card = document.createElement("div");
+            card.className = "message-card" + (c.visible ? " read" : "");
+            card.style.cssText = `border: 1px solid #e2e2e2; border-left: 4px solid ${c.visible ? '#4caf50' : '#B8860B'}; border-radius: 6px; padding: 1rem 1.2rem; margin-bottom: 1rem; background: ${c.visible ? '#fafafa' : '#fff'};`;
+
+            const header = document.createElement("div");
+            header.style.cssText = "display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.6rem;";
+
+            const who = document.createElement("div");
+            const nameEl = document.createElement("strong");
+            nameEl.textContent = c.anonyme || !c.nom ? "Anonyme" : c.nom;
+            const photoEl = document.createElement("span");
+            photoEl.textContent = ` — ${c.photoUrl}`;
+            photoEl.style.cssText = "color:#888; font-size:0.8rem; margin-left:0.4rem;";
+            who.appendChild(nameEl);
+            who.appendChild(photoEl);
+
+            const meta = document.createElement("div");
+            meta.style.cssText = "display:flex; gap:0.5rem; align-items:center;";
+            const dateEl = document.createElement("span");
+            dateEl.textContent = new Date(c.date).toLocaleString("fr-FR");
+            dateEl.style.cssText = "font-size:0.8rem; color:#888;";
+            meta.appendChild(dateEl);
+
+            const toggleBtn = document.createElement("button");
+            toggleBtn.className = "admin-btn secondary-btn btn-sm";
+            toggleBtn.innerHTML = c.visible ? `<i class="fa-solid fa-eye-slash"></i> Masquer` : `<i class="fa-solid fa-check"></i> Approuver`;
+            toggleBtn.addEventListener("click", async () => {
+                await api(`/api/comments/${c.id}`, { method: "PATCH", body: { visible: !c.visible } });
+                refreshComments();
+            });
+            meta.appendChild(toggleBtn);
+
+            const delBtn = document.createElement("button");
+            delBtn.className = "admin-btn danger-btn btn-sm";
+            delBtn.innerHTML = `<i class="fa-solid fa-trash-can"></i>`;
+            delBtn.title = "Supprimer";
+            delBtn.addEventListener("click", async () => {
+                if (!confirm("Supprimer ce commentaire ?")) return;
+                await api(`/api/comments/${c.id}`, { method: "DELETE" });
+                refreshComments();
+                showToast("Commentaire supprimé");
+            });
+            meta.appendChild(delBtn);
+
+            header.appendChild(who);
+            header.appendChild(meta);
+
+            const body = document.createElement("p");
+            body.textContent = c.message;
+            body.style.cssText = "margin:0; white-space:pre-wrap; line-height:1.5; font-size:0.92rem;";
+
+            card.appendChild(header);
+            card.appendChild(body);
+            container.appendChild(card);
+        });
+    } catch (err) {
+        console.warn("Erreur chargement commentaires:", err.message);
+    }
+}
+
+/* ==================================================
+   8quater. VIDÉOS
+   ================================================== */
+function setupVideosTab() {
+    if (!currentData.videos) currentData.videos = [];
+
+    const uploadInput = document.getElementById("video-upload-input");
+    const linkBtn = document.getElementById("add-video-link-btn");
+    const saveBtn = document.getElementById("save-videos-btn");
+
+    if (uploadInput) {
+        uploadInput.addEventListener("change", async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append("video", file);
+            try {
+                showToast("Envoi de la vidéo en cours…");
+                const data = await api("/api/upload-video", { method: "POST", body: formData });
+                currentData.videos.push({ id: "video_" + Date.now(), titre: file.name.replace(/\.[^.]+$/, ""), type: "upload", url: data.url });
+                renderVideosList();
+                showToast("Vidéo téléversée !");
+            } catch (err) {
+                alert(err.message);
+            }
+            uploadInput.value = "";
+        });
+    }
+
+    if (linkBtn) {
+        linkBtn.addEventListener("click", () => {
+            const url = prompt("Collez l'URL YouTube ou Vimeo :");
+            if (!url || !url.trim()) return;
+            const titre = prompt("Titre de la vidéo :", "Nouvelle vidéo") || "Nouvelle vidéo";
+            currentData.videos.push({ id: "video_" + Date.now(), titre, type: "embed", url: url.trim() });
+            renderVideosList();
+        });
+    }
+
+    if (saveBtn) {
+        saveBtn.addEventListener("click", async () => {
+            document.querySelectorAll(".video-titre-input").forEach(input => {
+                const item = currentData.videos.find(v => v.id === input.getAttribute("data-id"));
+                if (item) item.titre = input.value;
+            });
+            try {
+                await saveContent();
+                showToast("Vidéos sauvegardées !");
+            } catch (err) { alert(err.message); }
+        });
+    }
+
+    renderVideosList();
+}
+
+function toEmbedUrl(url) {
+    const yt = url.match(/(?:youtu\.be\/|youtube\.com\/watch\?v=|youtube\.com\/embed\/)([\w-]+)/);
+    if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+    const vimeo = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+    return url;
+}
+
+function renderVideosList() {
+    const container = document.getElementById("videos-list-container");
+    if (!container) return;
+    container.innerHTML = "";
+
+    (currentData.videos || []).forEach((video, idx) => {
+        const card = document.createElement("div");
+        card.className = "exp-item-card";
+        card.setAttribute("data-id", video.id);
+
+        const preview = video.type === "upload"
+            ? `<video src="${video.url}" controls style="max-width:220px; border-radius:6px;"></video>`
+            : `<iframe src="${toEmbedUrl(video.url)}" style="width:220px; height:124px; border:0; border-radius:6px;" allowfullscreen></iframe>`;
+
+        card.innerHTML = `
+            <div class="exp-card-header">
+                <span class="exp-number">Vidéo N°${idx + 1} (${video.type === "upload" ? "fichier" : "lien"})</span>
+                <div class="exp-actions">
+                    <button type="button" class="admin-btn danger-btn btn-sm delete-video-btn" title="Supprimer"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+            </div>
+            <div class="exp-fields">
+                <div class="form-group full-field">
+                    <label>Titre</label>
+                    <input type="text" class="video-titre-input" data-id="${video.id}" value="${(video.titre || "").replace(/"/g, "&quot;")}">
+                </div>
+                <div class="form-group full-field">${preview}</div>
+            </div>
+        `;
+        card.querySelector(".delete-video-btn").addEventListener("click", () => {
+            currentData.videos = currentData.videos.filter(v => v.id !== video.id);
+            renderVideosList();
+        });
+        container.appendChild(card);
+    });
+}
+
+/* ==================================================
+   8quinquies. À LA UNE (vedette)
+   ================================================== */
+function flattenGalleryImages() {
+    const images = [];
+    (currentData.projets || []).forEach(proj => {
+        (proj.images || []).forEach(img => {
+            images.push({ url: img.url, label: (img.titre || img.caption || proj.titre) + " — " + proj.titre });
+        });
+    });
+    return images;
+}
+
+async function populateVedetteItemSelect() {
+    const typeSelect = document.getElementById("vedette-type-select");
+    const itemSelect = document.getElementById("vedette-item-select");
+    if (!typeSelect || !itemSelect) return;
+
+    itemSelect.innerHTML = "";
+    const type = typeSelect.value;
+
+    if (type === "photo") {
+        flattenGalleryImages().forEach(img => {
+            const opt = document.createElement("option");
+            opt.value = img.url;
+            opt.textContent = img.label;
+            itemSelect.appendChild(opt);
+        });
+        if (itemSelect.options.length === 0) itemSelect.innerHTML = `<option value="">Aucune photo disponible</option>`;
+    } else if (type === "video") {
+        (currentData.videos || []).forEach(v => {
+            const opt = document.createElement("option");
+            opt.value = v.id;
+            opt.textContent = v.titre;
+            itemSelect.appendChild(opt);
+        });
+        if (itemSelect.options.length === 0) itemSelect.innerHTML = `<option value="">Aucune vidéo disponible</option>`;
+    } else if (type === "commentaire") {
+        try {
+            const comments = (await api("/api/comments/all")).filter(c => c.visible);
+            comments.forEach(c => {
+                const opt = document.createElement("option");
+                opt.value = c.id;
+                opt.textContent = `${c.anonyme || !c.nom ? "Anonyme" : c.nom} — ${c.message.slice(0, 60)}`;
+                itemSelect.appendChild(opt);
+            });
+            if (itemSelect.options.length === 0) itemSelect.innerHTML = `<option value="">Aucun commentaire approuvé disponible</option>`;
+        } catch {
+            itemSelect.innerHTML = `<option value="">Erreur de chargement</option>`;
+        }
+    }
+}
+
+function renderVedetteStatus() {
+    const statusEl = document.getElementById("vedette-status");
+    const removeBtn = document.getElementById("vedette-remove-btn");
+    if (!statusEl) return;
+
+    const v = currentData.vedette;
+    const isExpired = v && v.expiresAt && new Date(v.expiresAt).getTime() <= Date.now();
+    if (!v || isExpired) {
+        statusEl.textContent = "Rien à la une actuellement.";
+        if (removeBtn) removeBtn.style.display = "none";
+        return;
+    }
+
+    const remainingMs = new Date(v.expiresAt).getTime() - Date.now();
+    const remainingH = Math.max(0, Math.round(remainingMs / 3600000));
+    const labelMap = { photo: "Photo", video: "Vidéo", commentaire: "Commentaire" };
+    statusEl.innerHTML = `<strong>${labelMap[v.type] || v.type}</strong> — ${v.titre || v.message || ""} <br>Expire dans environ ${remainingH} h.`;
+    if (removeBtn) removeBtn.style.display = "inline-flex";
+}
+
+function setupVedetteTab() {
+    const typeSelect = document.getElementById("vedette-type-select");
+    const publishBtn = document.getElementById("vedette-publish-btn");
+    const removeBtn = document.getElementById("vedette-remove-btn");
+
+    if (typeSelect) {
+        typeSelect.addEventListener("change", populateVedetteItemSelect);
+        populateVedetteItemSelect();
+    }
+
+    if (publishBtn) {
+        publishBtn.addEventListener("click", async () => {
+            const type = document.getElementById("vedette-type-select").value;
+            const itemSelect = document.getElementById("vedette-item-select");
+            const value = itemSelect.value;
+            const hours = parseFloat(document.getElementById("vedette-duree-input").value) || 24;
+            if (!value) { alert("Aucun contenu disponible pour ce type."); return; }
+
+            let vedette = { type, expiresAt: new Date(Date.now() + hours * 3600000).toISOString() };
+
+            if (type === "photo") {
+                const img = flattenGalleryImages().find(i => i.url === value);
+                vedette.url = value;
+                vedette.titre = img ? img.label : "";
+            } else if (type === "video") {
+                const video = (currentData.videos || []).find(v => v.id === value);
+                if (!video) { alert("Vidéo introuvable."); return; }
+                vedette.videoType = video.type;
+                vedette.url = video.url;
+                vedette.titre = video.titre;
+            } else if (type === "commentaire") {
+                try {
+                    const comment = (await api("/api/comments/all")).find(c => c.id === value);
+                    if (!comment) { alert("Commentaire introuvable."); return; }
+                    vedette.message = comment.message;
+                    vedette.nom = comment.anonyme || !comment.nom ? "Anonyme" : comment.nom;
+                    vedette.photoUrl = comment.photoUrl;
+                } catch { alert("Erreur lors de la récupération du commentaire."); return; }
+            }
+
+            currentData.vedette = vedette;
+            try {
+                await saveContent();
+                renderVedetteStatus();
+                showToast("Contenu publié à la une !");
+            } catch (err) { alert(err.message); }
+        });
+    }
+
+    if (removeBtn) {
+        removeBtn.addEventListener("click", async () => {
+            currentData.vedette = null;
+            try {
+                await saveContent();
+                renderVedetteStatus();
+                showToast("Retiré de la une.");
+            } catch (err) { alert(err.message); }
+        });
     }
 }
 
