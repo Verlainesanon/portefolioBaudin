@@ -26,3 +26,6 @@ uploads/
 
 # Environnement
 .env
+
+# Commentaires visiteurs (données runtime, jamais commitées)
+data/comments.json
