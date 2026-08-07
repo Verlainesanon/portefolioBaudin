@@ -1,23 +1,24 @@
-# Mémoire Homie — Commentaires + Vidéos + À la une
-**Dernière mise à jour** : 2026-08-03
-**Statut global** : terminé — voir CV-Projet-Commentaires-Videos-Vedette.md
+# Mémoire Homie — Fix vidéo + commentaires vidéo + presse
+**Dernière mise à jour** : 2026-08-07
+**Statut global** : en cours
 
 ## Objectif
-Ajouter système de commentaires modérés sous chaque photo galerie (visiteur choisit anonyme ou pas, admin approuve/masque). Ajouter vidéos (upload fichier + lien YouTube/Vimeo). Ajouter espace "à la une" (photo/vidéo/commentaire choisi par admin, durée en heures, expiration auto, message si vide). Fixer bug presse existant + permettre article complet en plus du lien.
+Corriger 3 bugs signalés dans l'admin : (1) upload vidéo qui n'arrive pas en ligne, (2) commentaires manquants sous les vidéos (déjà présents sous les photos) + choix de visibilité admin format IG, (3) section article presse qui ne fonctionne pas.
 
 ## Plan validé
 | # | Étape | Skill | Statut | Résultat |
 |---|-------|-------|--------|----------|
-| 1 | Diagnostiquer bug presse | systematic-debugging | ✅ fait | Root cause: server.js ALLOWED_KEYS whitelist manquait presse/temoignages/services — save silencieusement ignoré. Corrigé + vérifié. |
-| 2 | Étendre presse (lien ou article complet) + fix | standard | ✅ fait | Champ "contenu" optionnel ajouté (admin + affichage détails/résumé), testé en navigateur. |
-| 3 | Backend commentaires (modèle + routes) | standard | ✅ fait | data/comments.json + 5 routes (POST public, GET public filtré visible, GET/PATCH/DELETE admin). Testé cycle complet post→pending→approve→visible. Clé photo = photoUrl (url image, unique). |
-| 4 | UI galerie commentaires | standard | ✅ fait | Panneau injecté dans lightbox (js/theme-lightbox.js), formulaire anonyme/nom, testé UI→API→pending. Fonctionne sur galerie.html et project.html (lightbox partagée). |
-| 5 | UI admin modération commentaires | standard | ✅ fait | Nouvel onglet "Commentaires" (badge en attente, approuver/masquer/supprimer). Testé cycle complet via UI réelle (Playwright). |
-| 6 | Vidéos (upload + embed URL) | standard | ✅ fait | Nouvel onglet admin "Vidéos" (upload fichier MP4/WEBM/OGG 100Mo max, ou lien YouTube/Vimeo). Section galerie.html publique. CSP Helmet ajustée (frameSrc) pour autoriser embeds. Testé upload API + rendu public + admin UI. |
-| 7 | "À la une" (choix + durée + expiration) | standard | ✅ fait | Nouvel onglet admin "À la une" (photo/vidéo/commentaire, durée en heures). Nouvelle section sur index.html. Expiration auto vérifiée côté serveur à chaque lecture (GET /api/content). Testé publier/retirer/expiration via UI réelle. |
-| 8 | Test navigateur complet | run + webapp-testing | ✅ fait (fait au fil de l'eau à chaque étape) | |
-| 9 | CV de projet | standard | ⬜ à faire | |
+| 1 | Diagnostic live (API + navigateur Playwright) | webapp-testing | ✅ fait | Vidéo/presse marchent techniquement en local ; vrai bug vidéo = bouton "Enregistrer" séparé hors écran, facile à oublier. Commentaires: système complet existe pour photos, absent pour vidéos. |
+| 2 | Vidéo : auto-save après upload | standard | ⬜ à faire | |
+| 3 | Commentaires sous vidéos | standard | ⬜ à faire | |
+| 4 | Presse : rendre article plus visible | standard | ⬜ à faire | |
+| 5 | Test navigateur + commit + push | webapp-testing | ⬜ à faire | |
 
 ## Notes de reprise
-- Stack: Node/Express, DB JSON fichier (data/db.json), admin JWT (admin.html), presse lit data.presse via js/portfolio.js renderPresse().
-- Presse déjà a UI admin (add-presse-btn) mais utilisateur dit que ça marche pas — à diagnostiquer étape 1.
+- Stack: Node/Express, DB JSON fichier (data/db.json), admin JWT (/gestion en local, ADMIN_PATH en prod), hébergé sur Render (plan gratuit — render.yaml).
+- Commentaires: data/comments.json, clé = photoUrl (générique, marche aussi pour url vidéo). Panneau UI dans js/theme-lightbox.js (photos only, pas branché sur js/portfolio.js renderVideos()).
+- Vidéos admin: js/admin.js setupVideosTab() ~ligne 1181, bouton save id="save-videos-btn" (admin.html ligne 490).
+- Presse: champ "contenu" optionnel, admin.js VITRINE_LISTS ligne ~552, affichage js/portfolio.js renderPresse() ligne ~399 (details/summary repliable).
+
+## Projets précédents
+- Commentaires + Vidéos + À la une — 2026-08-03 — terminé — voir CV-Projet-Commentaires-Videos-Vedette.md

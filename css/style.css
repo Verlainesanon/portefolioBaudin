@@ -763,6 +763,29 @@ section {
     font-size: 1.05rem;
     font-weight: 500;
 }
+.video-comments {
+    max-width: 100%;
+    margin-top: 1rem;
+    background: rgba(0, 0, 0, 0.04);
+    color: inherit;
+}
+.video-comments .lightbox-comments-loading,
+.video-comments .lightbox-comments-empty {
+    color: rgba(0, 0, 0, 0.45);
+}
+.video-comments .comment-message,
+.video-comments .comment-anon-toggle {
+    color: rgba(0, 0, 0, 0.7);
+}
+.video-comments .comment-item {
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+.video-comments .lightbox-comment-form input[type="text"],
+.video-comments .lightbox-comment-form textarea {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.15);
+    color: inherit;
+}
 
 /* Témoignages */
 .temoignages-grid {

@@ -355,9 +355,14 @@ function renderVideos(videos) {
             <div class="video-item">
                 ${media}
                 <h4 class="video-titre">${v.titre || ""}</h4>
+                <div class="lightbox-comments video-comments" data-media-url="${escapeHtml(v.url)}"></div>
             </div>
         `;
     }).join("");
+
+    container.querySelectorAll(".video-comments").forEach(panel => {
+        loadCommentsPanel(panel.getAttribute("data-media-url"), panel);
+    });
 }
 
 // Rend la section "À la une" (photo, vidéo ou commentaire choisi par l'admin, avec expiration)

@@ -1196,7 +1196,9 @@ function setupVideosTab() {
                 const data = await api("/api/upload-video", { method: "POST", body: formData });
                 currentData.videos.push({ id: "video_" + Date.now(), titre: file.name.replace(/\.[^.]+$/, ""), type: "upload", url: data.url });
                 renderVideosList();
-                showToast("Vidéo téléversée !");
+                showToast("Envoi terminé, mise en ligne…");
+                await saveContent();
+                showToast("Vidéo en ligne !");
             } catch (err) {
                 alert(err.message);
             }
@@ -1205,12 +1207,16 @@ function setupVideosTab() {
     }
 
     if (linkBtn) {
-        linkBtn.addEventListener("click", () => {
+        linkBtn.addEventListener("click", async () => {
             const url = prompt("Collez l'URL YouTube ou Vimeo :");
             if (!url || !url.trim()) return;
             const titre = prompt("Titre de la vidéo :", "Nouvelle vidéo") || "Nouvelle vidéo";
             currentData.videos.push({ id: "video_" + Date.now(), titre, type: "embed", url: url.trim() });
             renderVideosList();
+            try {
+                await saveContent();
+                showToast("Vidéo en ligne !");
+            } catch (err) { alert(err.message); }
         });
     }
 

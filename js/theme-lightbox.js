@@ -180,8 +180,8 @@ function getCommentsPanel() {
     return panel;
 }
 
-async function loadCommentsPanel(photoUrl) {
-    const panel = getCommentsPanel();
+async function loadCommentsPanel(photoUrl, targetPanel) {
+    const panel = targetPanel || getCommentsPanel();
     if (!panel) return;
     panel.dataset.photoUrl = photoUrl;
     panel.innerHTML = `<p class="lightbox-comments-loading">Chargement des commentaires…</p>`;
